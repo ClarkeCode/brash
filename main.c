@@ -42,6 +42,13 @@ typedef enum {
 
 	OPERATOR_ASSIGNMENT,
 
+	OPERATOR_EQUALITY,
+	OPERATOR_INEQUALITY,
+	OPERATOR_LESSER,
+	OPERATOR_GREATER,
+	OPERATOR_LESSER_EQUAL,
+	OPERATOR_GREATER_EQUAL,
+
 	LOGICAL_NOT,
 	LOGICAL_AND,
 	LOGICAL_OR,
@@ -152,10 +159,6 @@ Token* lexer_produce_token(Lexer* lexer) {
 		tok = make_token(lexer, OPERATOR_MODULO, strlen("%"));
 		lexer_consume_fixed(lexer, strlen("%"));
 	}
-	else if (strncmp(lexer->line + lexer->char_offset, "=", strlen("=")) == 0) {
-		tok = make_token(lexer, OPERATOR_ASSIGNMENT, strlen("="));
-		lexer_consume_fixed(lexer, strlen("="));
-	}
 
 	else if (strncmp(lexer->line + lexer->char_offset, "(", strlen("(")) == 0) {
 		tok = make_token(lexer, PAREN_OPEN, strlen("("));
@@ -174,10 +177,6 @@ Token* lexer_produce_token(Lexer* lexer) {
 		lexer_consume_fixed(lexer, strlen("}"));
 	}
 
-	else if (strncmp(lexer->line + lexer->char_offset, "!", strlen("!")) == 0) {
-		tok = make_token(lexer, LOGICAL_NOT, strlen("!"));
-		lexer_consume_fixed(lexer, strlen("!"));
-	}
 	else if (strncmp(lexer->line + lexer->char_offset, "&&", strlen("&&")) == 0) {
 		tok = make_token(lexer, LOGICAL_AND, strlen("&&"));
 		lexer_consume_fixed(lexer, strlen("&&"));
@@ -198,6 +197,40 @@ Token* lexer_produce_token(Lexer* lexer) {
 	else if (strncmp(lexer->line + lexer->char_offset, "false", strlen("false")) == 0) {
 		tok = make_token(lexer, BOOLEAN, strlen("false"));
 		lexer_consume_fixed(lexer, strlen("false"));
+	}
+
+	//Operators or keywords with potential overlaps
+	else if (strncmp(lexer->line + lexer->char_offset, "==", strlen("==")) == 0) {
+		tok = make_token(lexer, OPERATOR_EQUALITY, strlen("=="));
+		lexer_consume_fixed(lexer, strlen("=="));
+	}
+	else if (strncmp(lexer->line + lexer->char_offset, "!=", strlen("!=")) == 0) {
+		tok = make_token(lexer, OPERATOR_INEQUALITY, strlen("!="));
+		lexer_consume_fixed(lexer, strlen("!="));
+	}
+	else if (strncmp(lexer->line + lexer->char_offset, "!", strlen("!")) == 0) {
+		tok = make_token(lexer, LOGICAL_NOT, strlen("!"));
+		lexer_consume_fixed(lexer, strlen("!"));
+	}
+	else if (strncmp(lexer->line + lexer->char_offset, "=", strlen("=")) == 0) {
+		tok = make_token(lexer, OPERATOR_ASSIGNMENT, strlen("="));
+		lexer_consume_fixed(lexer, strlen("="));
+	}
+	else if (strncmp(lexer->line + lexer->char_offset, "<=", strlen("<=")) == 0) {
+		tok = make_token(lexer, OPERATOR_LESSER_EQUAL, strlen("<="));
+		lexer_consume_fixed(lexer, strlen("<="));
+	}
+	else if (strncmp(lexer->line + lexer->char_offset, ">=", strlen(">=")) == 0) {
+		tok = make_token(lexer, OPERATOR_GREATER_EQUAL, strlen(">="));
+		lexer_consume_fixed(lexer, strlen(">="));
+	}
+	else if (strncmp(lexer->line + lexer->char_offset, "<", strlen("<")) == 0) {
+		tok = make_token(lexer, OPERATOR_LESSER, strlen("<"));
+		lexer_consume_fixed(lexer, strlen("<"));
+	}
+	else if (strncmp(lexer->line + lexer->char_offset, ">", strlen(">")) == 0) {
+		tok = make_token(lexer, OPERATOR_GREATER, strlen(">"));
+		lexer_consume_fixed(lexer, strlen(">"));
 	}
 
 	else if(char_in(current_char, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_")) {
@@ -221,24 +254,30 @@ Token* lexer_produce_token(Lexer* lexer) {
 
 char* getStr_token_t(token_t lookup) {
 	switch(lookup) {
-		case STRING              : return "STRING";
-		case NUMBER              : return "NUMBER";
-		case BOOLEAN             : return "BOOLEAN";
-		case IDENTIFIER          : return "IDENTIFIER";
-		case PAREN_OPEN          : return "PAREN_OPEN";
-		case PAREN_CLOSE         : return "PAREN_CLOSE";
-		case BRACE_OPEN          : return "BRACE_OPEN";
-		case BRACE_CLOSE         : return "BRACE_CLOSE";
-		case OPERATOR_ADD        : return "OPERATOR_ADD";
-		case OPERATOR_SUB        : return "OPERATOR_SUB";
-		case OPERATOR_MULTIPLY   : return "OPERATOR_MULTIPLY";
-		case OPERATOR_DIVIDE     : return "OPERATOR_DIVIDE";
-		case OPERATOR_MODULO     : return "OPERATOR_MODULO";
-		case OPERATOR_ASSIGNMENT : return "OPERATOR_ASSIGNMENT";
-		case LOGICAL_NOT         : return "LOGICAL_NOT";
-		case LOGICAL_AND         : return "LOGICAL_AND";
-		case LOGICAL_OR          : return "LOGICAL_OR";
-		case LOGICAL_XOR         : return "LOGICAL_XOR";
+		case STRING                   : return "STRING";
+		case NUMBER                   : return "NUMBER";
+		case BOOLEAN                  : return "BOOLEAN";
+		case IDENTIFIER               : return "IDENTIFIER";
+		case PAREN_OPEN               : return "PAREN_OPEN";
+		case PAREN_CLOSE              : return "PAREN_CLOSE";
+		case BRACE_OPEN               : return "BRACE_OPEN";
+		case BRACE_CLOSE              : return "BRACE_CLOSE";
+		case OPERATOR_ADD             : return "OPERATOR_ADD";
+		case OPERATOR_SUB             : return "OPERATOR_SUB";
+		case OPERATOR_MULTIPLY        : return "OPERATOR_MULTIPLY";
+		case OPERATOR_DIVIDE          : return "OPERATOR_DIVIDE";
+		case OPERATOR_MODULO          : return "OPERATOR_MODULO";
+		case OPERATOR_ASSIGNMENT      : return "OPERATOR_ASSIGNMENT";
+		case OPERATOR_EQUALITY        : return "OPERATOR_EQUALITY";
+		case OPERATOR_INEQUALITY      : return "OPERATOR_INEQUALITY";
+		case OPERATOR_LESSER          : return "OPERATOR_LESSER";
+		case OPERATOR_GREATER         : return "OPERATOR_GREATER";
+		case OPERATOR_LESSER_EQUAL    : return "OPERATOR_LESSER_EQUAL";
+		case OPERATOR_GREATER_EQUAL   : return "OPERATOR_GREATER_EQUAL";
+		case LOGICAL_NOT              : return "LOGICAL_NOT";
+		case LOGICAL_AND              : return "LOGICAL_AND";
+		case LOGICAL_OR               : return "LOGICAL_OR";
+		case LOGICAL_XOR              : return "LOGICAL_XOR";
 
 		default: return "LOOKUP_UNKNOWN_VALUE";
 	}
@@ -246,7 +285,7 @@ char* getStr_token_t(token_t lookup) {
 
 
 int main(int argc, char* argv[]) {
-	char* program = " \t \"Hello this is a string\"\n +12.74 greg = true false   \n({}) -*/%&&||^^!";
+	char* program = " \t \"Hello this is a string\"\n +12.74 greg = true == false !!=<<=>>=   \n({}) -*/%&&||^^!";
 	
 	Lexer* lex = make_lexer(program, "notfile", 0);
 	Token* tok = NULL;
