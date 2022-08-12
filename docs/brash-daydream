@@ -1,0 +1,38 @@
+##EXAMPLE: GENERATE AN ARRAY OF 50 RANDOM NUMBERS BETWEEN 0 AND 10
+//C-style comment
+random_int(int: min, max) {
+	return random(min, max)
+}
+
+#makearray is taking a function pointer/generator function which returns an int, therefore can infer type of array<int>(50)
+rolls = random_int 0 10 => makearray 50
+
+do println foreach rolls;
+
+
+
+
+
+##PARSING EXAMPLE
+split-first (str phrase, char delim) {
+	delim_index = find-char phrase delim
+	return tuple<str, str>(phrase[0:delim_index], phrase[delim_index:] | strip-first delim)
+}
+
+tuple-cast (int index, G_TYPE function<str> interpreter, tuple<T*> to_modify) {
+	t_types = tuple-get-types to_modify
+	if index >= len t_types {
+		panic "Out of bounds"
+	}
+	t_types[index] = interpreter | get-func-return-type
+
+	return tuple<t_types>(to_modify[0:index], to_modify[index] | interpreter, to_modify[index+1:])
+}
+
+loglines = readlines "./logs/mylogfile.log" | strip-newline | discard-empty | makearray
+
+#An element-wise transformation
+         #arr<str>  arr<tuple<str,str>>  arr<tuple<int, str>>
+refined = loglines | split-first ':' | tuple-cast 0 parse-int
+
+refined | printf "Process id %d,  Process name %s\n"
