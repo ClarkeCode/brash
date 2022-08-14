@@ -3,6 +3,10 @@
 #include <stdbool.h> //bool
 #include <string.h>
 
+#include "enumerations.h"
+#include "enum_lookups.h"
+
+
 //"Utility functions"
 bool char_in(char search, char* searchspace) {
 	for (size_t x = 0; searchspace[x] != '\0'; x++) {
@@ -20,41 +24,6 @@ size_t advance_whitespace(size_t offset, char* source) {
 	}
 	return advanced_offset;
 }
-
-
-//Enumerations and types
-typedef enum {
-	STRING,
-	NUMBER,
-	BOOLEAN,
-	IDENTIFIER,
-
-	PAREN_OPEN,
-	PAREN_CLOSE,
-	BRACE_OPEN,
-	BRACE_CLOSE,
-
-	OPERATOR_ADD,
-	OPERATOR_SUB,
-	OPERATOR_MULTIPLY,
-	OPERATOR_DIVIDE,
-	OPERATOR_MODULO,
-
-	OPERATOR_ASSIGNMENT,
-
-	OPERATOR_EQUALITY,
-	OPERATOR_INEQUALITY,
-	OPERATOR_LESSER,
-	OPERATOR_GREATER,
-	OPERATOR_LESSER_EQUAL,
-	OPERATOR_GREATER_EQUAL,
-
-	LOGICAL_NOT,
-	LOGICAL_AND,
-	LOGICAL_OR,
-	LOGICAL_XOR
-
-} token_t;
 
 typedef struct {
 	token_t type;
@@ -249,38 +218,6 @@ Token* lexer_produce_token(Lexer* lexer) {
 	}
 
 	return tok;
-}
-
-
-char* getStr_token_t(token_t lookup) {
-	switch(lookup) {
-		case STRING                   : return "STRING";
-		case NUMBER                   : return "NUMBER";
-		case BOOLEAN                  : return "BOOLEAN";
-		case IDENTIFIER               : return "IDENTIFIER";
-		case PAREN_OPEN               : return "PAREN_OPEN";
-		case PAREN_CLOSE              : return "PAREN_CLOSE";
-		case BRACE_OPEN               : return "BRACE_OPEN";
-		case BRACE_CLOSE              : return "BRACE_CLOSE";
-		case OPERATOR_ADD             : return "OPERATOR_ADD";
-		case OPERATOR_SUB             : return "OPERATOR_SUB";
-		case OPERATOR_MULTIPLY        : return "OPERATOR_MULTIPLY";
-		case OPERATOR_DIVIDE          : return "OPERATOR_DIVIDE";
-		case OPERATOR_MODULO          : return "OPERATOR_MODULO";
-		case OPERATOR_ASSIGNMENT      : return "OPERATOR_ASSIGNMENT";
-		case OPERATOR_EQUALITY        : return "OPERATOR_EQUALITY";
-		case OPERATOR_INEQUALITY      : return "OPERATOR_INEQUALITY";
-		case OPERATOR_LESSER          : return "OPERATOR_LESSER";
-		case OPERATOR_GREATER         : return "OPERATOR_GREATER";
-		case OPERATOR_LESSER_EQUAL    : return "OPERATOR_LESSER_EQUAL";
-		case OPERATOR_GREATER_EQUAL   : return "OPERATOR_GREATER_EQUAL";
-		case LOGICAL_NOT              : return "LOGICAL_NOT";
-		case LOGICAL_AND              : return "LOGICAL_AND";
-		case LOGICAL_OR               : return "LOGICAL_OR";
-		case LOGICAL_XOR              : return "LOGICAL_XOR";
-
-		default: return "LOOKUP_UNKNOWN_VALUE";
-	}
 }
 
 

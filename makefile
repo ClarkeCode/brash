@@ -10,6 +10,9 @@ OBJS := $(SRCS:%.c=%.o)
 all: main
 
 main: $(OBJS)
+	echo "#ifndef ENUM_LOOKUPS\n#define ENUM_LOOKUPS\n//Generated file" > enum_lookups.h
+	./generate_enumeration_lookups.sh enumerations.h >> enum_lookups.h
+	echo "#endif" >> enum_lookups.h
 	$(CC) $(LINKERFLAGS) $(OBJS) -o $@
 
 
