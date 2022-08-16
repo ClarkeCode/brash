@@ -3,3 +3,4 @@
 main
 
 enum_lookups.h
+lexer.h
