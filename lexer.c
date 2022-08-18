@@ -202,8 +202,9 @@ void lexer_produce_token(Lexer* lexer, Token* tok) {
 }
 
 
-void lexer_tokenize_all(Lexer* lexer, Token* tokens, size_t* size) {
-	tokens = (Token*) calloc(200, sizeof(Token));
+//TODO: implement a dynamic number of tokens with realloc
+Token* lexer_tokenize_all(Lexer* lexer, size_t* size) {
+	Token* tokens = (Token*) calloc(200, sizeof(Token));
 	size_t num_tokens = 0;
 
 	while(lexer->char_offset < strlen(lexer->line)) {
@@ -212,4 +213,5 @@ void lexer_tokenize_all(Lexer* lexer, Token* tokens, size_t* size) {
 	}
 
 	*size = num_tokens;
+	return tokens;
 }

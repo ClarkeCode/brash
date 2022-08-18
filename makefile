@@ -23,5 +23,5 @@ generated: lexer.c
 	echo "#endif" >> enum_lookups.h
 
 clean:
-	rm -f a.out main *.o
+	rm -f *.out main *.o
 	rm -f lexer.h enum_lookups.h
