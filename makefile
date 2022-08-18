@@ -1,6 +1,6 @@
 # Used https://opensource.com/article/18/8/what-how-makefile as a reference
 
-CC = gcc
+CC = gcc -g
 COMPILERFLAGS = -c
 LINKERFLAGS = -lm
 
