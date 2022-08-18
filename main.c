@@ -44,13 +44,23 @@ int main(int argc, char* argv[]) {
 	char* program = " \t \"Hello this is a string\"\n +12.74 greg = true == false !!=<<=>>=   \n({}) -*/%&&||^^!";
 	
 	Lexer* lex = make_lexer(program, "notfile", 0);
-	Token* tok = NULL;
-
+	size_t num_tok = 0;
+	Token* tok;
+	/*
 	while ((tok = lexer_produce_token(lex)) ) {
 		fprintf(stdout, "type: %-22s content: '%s'\n", getStr_token_t(tok->type), tok->content);
 	}
+	*/
+	lexer_tokenize_all(lex, tok, &num_tok);
+
+	for (size_t x = 0; x < num_tok; x++) {
+		fprintf(stdout, "type: %-22s content: '%s'\n", getStr_token_t((tok+x)->type), (tok+x)->content);
+		free((tok+x)->content);
+	}
+	free(tok);
 
 	fprintf(stdout, "Remaining in lexer: '%s'\n", lex->line + lex->char_offset);
+	free(lex);
 
 	return 0;
 }

@@ -43,8 +43,7 @@ void lexer_consume_fixed(Lexer* lexer, size_t chars_to_consume) {
 	}
 }
 
-Token* make_token(Lexer* lexer, token_t type, size_t contentlen) {
-	Token* tok = (Token*) calloc(1, sizeof(Token));
+void make_token(Lexer* lexer, Token* tok, token_t type, size_t contentlen) {
 	tok->type = type;
 	tok->origin_file = lexer->source_file;
 	tok->origin_line = lexer->line_offset;
@@ -52,27 +51,24 @@ Token* make_token(Lexer* lexer, token_t type, size_t contentlen) {
 
 	tok->content = (char*) calloc(contentlen+1, sizeof(char));
 	strncpy(tok->content, lexer->line + lexer->char_offset, contentlen);
-	return tok;
 }
 
 //Primary tokenization function?
 //Returning a nullptr means the lexer contains no more tokens
-Token* lexer_produce_token(Lexer* lexer) {
+void lexer_produce_token(Lexer* lexer, Token* tok) {
 	lexer->char_offset = advance_whitespace(lexer->char_offset, lexer->line);
 	
 	char lookbehind   = (lexer->char_offset > 0) ? lexer->line[lexer->char_offset-1] : '\0';
 	char current_char = lexer->line[lexer->char_offset];
 	char lookahead    = lexer->line[lexer->char_offset+1];
 
-	Token* tok = NULL;
-	
 	if (current_char == '"') {
 		lexer_consume_fixed(lexer, 1);
 		//TODO: account for an escaped " character
 		char* location_found = strchr(lexer->line + lexer->char_offset, '"');
 		if (!location_found) {} //TODO: handle unmatched "
 		size_t length = location_found - (lexer->line + lexer->char_offset);
-		tok = make_token(lexer, STRING, length);
+		make_token(lexer, tok, STRING, length);
 		lexer_consume_fixed(lexer, length + 1); //Advances past closing "
 	}
 
@@ -86,102 +82,102 @@ Token* lexer_produce_token(Lexer* lexer) {
 			else break;
 		}
 		size_t length = found - orig;
-		tok = make_token(lexer, NUMBER, length);
+		make_token(lexer, tok, NUMBER, length);
 		lexer_consume_fixed(lexer, length);
 	}
 	
 	//When tokenizing keywords/operators, use strncmp
 	else if (strncmp(lexer->line + lexer->char_offset, "+", strlen("+")) == 0) {
-		tok = make_token(lexer, OPERATOR_ADD, strlen("+"));
+		make_token(lexer, tok, OPERATOR_ADD, strlen("+"));
 		lexer_consume_fixed(lexer, strlen("+"));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, "-", strlen("-")) == 0) {
-		tok = make_token(lexer, OPERATOR_SUB, strlen("-"));
+		make_token(lexer, tok, OPERATOR_SUB, strlen("-"));
 		lexer_consume_fixed(lexer, strlen("-"));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, "*", strlen("*")) == 0) {
-		tok = make_token(lexer, OPERATOR_MULTIPLY, strlen("*"));
+		make_token(lexer, tok, OPERATOR_MULTIPLY, strlen("*"));
 		lexer_consume_fixed(lexer, strlen("*"));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, "/", strlen("/")) == 0) {
-		tok = make_token(lexer, OPERATOR_DIVIDE, strlen("/"));
+		make_token(lexer, tok, OPERATOR_DIVIDE, strlen("/"));
 		lexer_consume_fixed(lexer, strlen("/"));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, "%", strlen("%")) == 0) {
-		tok = make_token(lexer, OPERATOR_MODULO, strlen("%"));
+		make_token(lexer, tok, OPERATOR_MODULO, strlen("%"));
 		lexer_consume_fixed(lexer, strlen("%"));
 	}
 
 	else if (strncmp(lexer->line + lexer->char_offset, "(", strlen("(")) == 0) {
-		tok = make_token(lexer, PAREN_OPEN, strlen("("));
+		make_token(lexer, tok, PAREN_OPEN, strlen("("));
 		lexer_consume_fixed(lexer, strlen("("));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, ")", strlen(")")) == 0) {
-		tok = make_token(lexer, PAREN_CLOSE, strlen(")"));
+		make_token(lexer, tok, PAREN_CLOSE, strlen(")"));
 		lexer_consume_fixed(lexer, strlen(")"));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, "{", strlen("{")) == 0) {
-		tok = make_token(lexer, BRACE_OPEN, strlen("{"));
+		make_token(lexer, tok, BRACE_OPEN, strlen("{"));
 		lexer_consume_fixed(lexer, strlen("{"));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, "}", strlen("}")) == 0) {
-		tok = make_token(lexer, BRACE_CLOSE, strlen("}"));
+		make_token(lexer, tok, BRACE_CLOSE, strlen("}"));
 		lexer_consume_fixed(lexer, strlen("}"));
 	}
 
 	else if (strncmp(lexer->line + lexer->char_offset, "&&", strlen("&&")) == 0) {
-		tok = make_token(lexer, LOGICAL_AND, strlen("&&"));
+		make_token(lexer, tok, LOGICAL_AND, strlen("&&"));
 		lexer_consume_fixed(lexer, strlen("&&"));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, "||", strlen("||")) == 0) {
-		tok = make_token(lexer, LOGICAL_OR, strlen("||"));
+		make_token(lexer, tok, LOGICAL_OR, strlen("||"));
 		lexer_consume_fixed(lexer, strlen("||"));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, "^^", strlen("^^")) == 0) {
-		tok = make_token(lexer, LOGICAL_XOR, strlen("^^"));
+		make_token(lexer, tok, LOGICAL_XOR, strlen("^^"));
 		lexer_consume_fixed(lexer, strlen("^^"));
 	}
 
 	else if (strncmp(lexer->line + lexer->char_offset, "true", strlen("true")) == 0) {
-		tok = make_token(lexer, BOOLEAN, strlen("true"));
+		make_token(lexer, tok, BOOLEAN, strlen("true"));
 		lexer_consume_fixed(lexer, strlen("true"));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, "false", strlen("false")) == 0) {
-		tok = make_token(lexer, BOOLEAN, strlen("false"));
+		make_token(lexer, tok, BOOLEAN, strlen("false"));
 		lexer_consume_fixed(lexer, strlen("false"));
 	}
 
 	//Operators or keywords with potential overlaps
 	else if (strncmp(lexer->line + lexer->char_offset, "==", strlen("==")) == 0) {
-		tok = make_token(lexer, OPERATOR_EQUALITY, strlen("=="));
+		make_token(lexer, tok, OPERATOR_EQUALITY, strlen("=="));
 		lexer_consume_fixed(lexer, strlen("=="));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, "!=", strlen("!=")) == 0) {
-		tok = make_token(lexer, OPERATOR_INEQUALITY, strlen("!="));
+		make_token(lexer, tok, OPERATOR_INEQUALITY, strlen("!="));
 		lexer_consume_fixed(lexer, strlen("!="));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, "!", strlen("!")) == 0) {
-		tok = make_token(lexer, LOGICAL_NOT, strlen("!"));
+		make_token(lexer, tok, LOGICAL_NOT, strlen("!"));
 		lexer_consume_fixed(lexer, strlen("!"));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, "=", strlen("=")) == 0) {
-		tok = make_token(lexer, OPERATOR_ASSIGNMENT, strlen("="));
+		make_token(lexer, tok, OPERATOR_ASSIGNMENT, strlen("="));
 		lexer_consume_fixed(lexer, strlen("="));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, "<=", strlen("<=")) == 0) {
-		tok = make_token(lexer, OPERATOR_LESSER_EQUAL, strlen("<="));
+		make_token(lexer, tok, OPERATOR_LESSER_EQUAL, strlen("<="));
 		lexer_consume_fixed(lexer, strlen("<="));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, ">=", strlen(">=")) == 0) {
-		tok = make_token(lexer, OPERATOR_GREATER_EQUAL, strlen(">="));
+		make_token(lexer, tok, OPERATOR_GREATER_EQUAL, strlen(">="));
 		lexer_consume_fixed(lexer, strlen(">="));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, "<", strlen("<")) == 0) {
-		tok = make_token(lexer, OPERATOR_LESSER, strlen("<"));
+		make_token(lexer, tok, OPERATOR_LESSER, strlen("<"));
 		lexer_consume_fixed(lexer, strlen("<"));
 	}
 	else if (strncmp(lexer->line + lexer->char_offset, ">", strlen(">")) == 0) {
-		tok = make_token(lexer, OPERATOR_GREATER, strlen(">"));
+		make_token(lexer, tok, OPERATOR_GREATER, strlen(">"));
 		lexer_consume_fixed(lexer, strlen(">"));
 	}
 
@@ -196,10 +192,24 @@ Token* lexer_produce_token(Lexer* lexer) {
 			else break;
 		}
 		size_t length = found - orig;
-		tok = make_token(lexer, IDENTIFIER, length);
+		make_token(lexer, tok, IDENTIFIER, length);
 		lexer_consume_fixed(lexer, length);
 	}
 
-	return tok;
+	else {
+		tok = NULL;
+	}
 }
 
+
+void lexer_tokenize_all(Lexer* lexer, Token* tokens, size_t* size) {
+	tokens = (Token*) calloc(200, sizeof(Token));
+	size_t num_tokens = 0;
+
+	while(lexer->char_offset < strlen(lexer->line)) {
+		lexer_produce_token(lexer, tokens + num_tokens);
+		num_tokens++;
+	}
+
+	*size = num_tokens;
+}
