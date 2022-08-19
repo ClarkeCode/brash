@@ -1,5 +1,6 @@
 #ifndef BRASH_STRUCTURES
 #define BRASH_STRUCTURES
+#include <stddef.h>
 #include "enumerations.h"
 
 typedef struct {
