@@ -1,9 +1,11 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 
 #include "structs.h"
 #include "lexer.h"
+#include "enum_lookups.h"
 
 Lexer* make_lexer(char* line, char* srcfile, size_t linenum) {
 	Lexer* lex = (Lexer*) calloc(1, sizeof(Lexer));
@@ -214,4 +216,19 @@ Token* lexer_tokenize_all(Lexer* lexer, size_t* size) {
 
 	*size = num_tokens;
 	return tokens;
+}
+
+//Write out tokens to specified file
+void dump_lexer_tokens(char* filename, Token* token_arr, size_t arr_sz) {
+	FILE* outfile = fopen(filename, "wb");
+	Token* tok = token_arr;
+	for (size_t x = 0; x < arr_sz; x++) {
+		tok = (token_arr + x);
+		fprintf(outfile,
+				"%s:%d:%-5d T%-3d %-25s '%s'\n",
+				tok->origin_file, tok->origin_line, tok->origin_char,
+				tok->type, getStr_token_t(tok->type), tok->content
+				);
+	}
+	fclose(outfile);
 }

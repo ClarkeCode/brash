@@ -41,22 +41,6 @@ void parse_statement(Parser* parser) {}
 void parse_declaration(Parser* parser) {}
 
 
-//TODO: move to lexer.c, linker requires a re-jig of enum-string lookup generator
-//Write out tokens to specified file
-void dump_lexer_tokens(char* filename, Token* token_arr, size_t arr_sz) {
-	FILE* outfile = fopen(filename, "wb");
-	Token* tok = token_arr;
-	for (size_t x = 0; x < arr_sz; x++) {
-		tok = (token_arr + x);
-		fprintf(outfile,
-				"%s:%d:%-5d T%-3d %-25s '%s'\n",
-				tok->origin_file, tok->origin_line, tok->origin_char,
-				tok->type, getStr_token_t(tok->type), tok->content
-				);
-	}
-	fclose(outfile);
-}
-
 int main(int argc, char* argv[]) {
 	char* program = " \t \"Hello this is a string\"\n +12.74 greg = true == false !!=<<=>>=   \n({}) -*/%&&||^^!";
 	
