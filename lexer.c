@@ -60,9 +60,9 @@ void make_token(Lexer* lexer, Token* tok, token_t type, size_t contentlen) {
 void lexer_produce_token(Lexer* lexer, Token* tok) {
 	lexer->char_offset = advance_whitespace(lexer->char_offset, lexer->line);
 	
-	char lookbehind   = (lexer->char_offset > 0) ? lexer->line[lexer->char_offset-1] : '\0';
+	//char lookbehind   = (lexer->char_offset > 0) ? lexer->line[lexer->char_offset-1] : '\0';
 	char current_char = lexer->line[lexer->char_offset];
-	char lookahead    = lexer->line[lexer->char_offset+1];
+	//char lookahead    = lexer->line[lexer->char_offset+1];
 
 	if (current_char == '"') {
 		lexer_consume_fixed(lexer, 1);
