@@ -1,0 +1,48 @@
+\documentclass{article}
+\usepackage[colorlinks = true, urlcolor = blue]{hyperref}
+\usepackage{multirow}
+
+\begin{document}
+
+\section{Operator Precedence}
+The order in which operators are evaluated are determined by their precedence.
+Higher precedence operators are evaluated before lower precedence operators.
+
+\begin{table}[h!]
+\begin{center}
+	\caption{Precedence - High to Low}
+\begin{tabular}{|c|l|l|}
+	\hline
+	Operator & Operator Name & Associativity \\
+	\hline
+	$( )$              & Group               & None  \\
+	!                  & Logical NOT         & Right \\
+	\~{}               & Bitwise Complement  & Right \\
+	-                  & Arithmetic Negation & Right \\
+
+	*                  & Multiplication      & Left \\
+	/                  & Division            & Left \\
+	\%                 & Modulo              & Left \\
+
+	+                  & Addition            & Left \\
+	-                  & Subtraction         & Left \\
+
+	\&\&               & Logical AND         & Left \\
+	$||$               & Logical OR          & Left \\
+	\^{}\^{}           & Logical XOR         & Left \\
+
+	\textless          & Lesser              & None \\
+	\textgreater       & Greater             & None \\
+	\textless=         & Less-equal          & None \\
+	\textgreater=      & Greater-equal       & None \\
+
+	==                 & Equality            & None \\
+	!=                 & Inequality          & None \\
+
+	=                  & Assignment          & Right \\
+	\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\end{document}
