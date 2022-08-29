@@ -30,8 +30,9 @@ typedef enum {
 	LOGICAL_NOT,
 	LOGICAL_AND,
 	LOGICAL_OR,
-	LOGICAL_XOR
+	LOGICAL_XOR,
 
+	ALL_TOKENS
 } token_t;
 
 #endif
