@@ -67,6 +67,12 @@ ASTNode* make_astnode(Token* token) {
 	else ast->datatype = TYPE_NOT_VALUE;
 	return ast;
 }
+void free_astnode(ASTNode* node) {
+	if (!node) return;
+	free_astnode(node->left);
+	free_astnode(node->right);
+	if (node) free(node);
+}
 void hang_left(ASTNode* parent, ASTNode* child) {
 	parent->left = child;
 	child->parent = parent;
@@ -75,50 +81,52 @@ void hang_right(ASTNode* parent, ASTNode* child) {
 	parent->right = child;
 	child->parent = parent;
 }
-void overwrite_child(ASTNode* parent, ASTNode* oldchild, ASTNode* newchild) {
-	if (parent->left == oldchild) hang_left(parent, newchild);
-	else hang_right(parent, newchild);
-}
 
 typedef struct {
 	Token* feed_tape;
 	size_t tape_size;
 	size_t tape_offset;
 } Parser;
+Parser* make_parser(Token* tok, size_t num_tokens) {
+	Parser* parser = (Parser*) calloc(1, sizeof(Parser));
+	parser->feed_tape = tok;
+	parser->tape_size = num_tokens;
+	parser->tape_offset = 0;
+	return parser;
+}
+Token* parser_current_token(Parser* parser) {
+	if (parser->tape_offset >= parser->tape_size) return NULL;
+	return (parser->feed_tape + parser->tape_offset);
+}
+void parser_advance_tape(Parser* parser) { parser->tape_offset++; }
 
-ASTNode* parse_ast(Parser* parser) {
+ASTNode* parse_ast(Parser* parser, token_t terminator) {
 	if (!parser || !parser->feed_tape || parser->tape_size == 0) return NULL;
-	ASTNode* root_node = make_astnode(NULL);
-	ASTNode* active_node = make_astnode(parser->feed_tape);
-	hang_right(root_node, active_node);
+	ASTNode* active_node = NULL;
 
-	for (size_t x = 1; x < parser->tape_size; x++) {
-		Token* tok = parser->feed_tape + x;
-		ASTNode* new_node = make_astnode(tok);
-		ASTNode* active_parent = active_node->parent;
-
-		if (is_valuetype(active_node->datatype) &&  !is_valuetype(new_node->datatype)) {
-			hang_left(new_node, active_node);
-			overwrite_child(active_parent, active_node, new_node); //need different behaviour for unary
-			active_node = new_node;
-		}
-		else if (!is_valuetype(active_node->datatype)) {
-			if (active_node->left && active_node->right) {} //no room for operands, parse error
-			else if (!active_node->left) {
-				hang_left(active_node, new_node);
-			}
-			else if (!active_node->right) {
-				hang_right(active_node, new_node);
-				active_node = new_node;
-			}
-			else {} //Unreachable
+	while(parser->tape_offset < parser->tape_size &&
+			(parser_current_token(parser) && parser_current_token(parser)->type != terminator)) {
+		Token* curr_token = parser_current_token(parser);
+		ASTNode* curr_node = make_astnode(curr_token);
+		
+		if (!active_node) {
+			active_node = curr_node;
 		}
 		else {
-			//Unreachable?
+			//TODO: rotate by precedence
+			hang_right(active_node, curr_node);
+			active_node = curr_node;
 		}
+
+		parser_advance_tape(parser);
+	}
+
+	while(true) {
+		if (!active_node->parent) break;
+		active_node = active_node->parent;
 	}
 	
-	return root_node;
+	return active_node;
 }
 
 
@@ -138,21 +146,19 @@ int main(/*int argc, char* argv[]*/) {
 		fclose(outfile);
 	}
 
-	ASTNode* test = make_astnode(tok);
-	ASTNode* test1 = make_astnode(tok+1);
-	ASTNode* test2 = make_astnode(tok+2);
-	hang_right(test, test1);
-	hang_left(test, test2);
-	FILE* fp = fopen("ast.dump", "w");
-	fprintf(stdout, "\n=== PARSER ===\n");
-	dump_tree(stdout, test);
-	fclose(fp);
-
-
-	get_precedence(test);
+	Parser* parser = make_parser(tok, num_tok);
+	ASTNode* ast = parse_ast(parser, -1);
+	{
+		FILE* fp = fopen("ast.out", "w");
+		fprintf(stdout, "\n=== PARSER ===\n");
+		dump_tree(stdout, ast);
+		fclose(fp);
+	}
 
 	
 	//Free allocated memory
+	free(parser);
+	free_astnode(ast);
 	for (size_t x = 0; x < num_tok; x++) free((tok+x)->content);
 	free(tok);
 	free(lex);
