@@ -219,8 +219,7 @@ Token* lexer_tokenize_all(Lexer* lexer, size_t* size) {
 }
 
 //Write out tokens to specified file
-void dump_lexer_tokens(char* filename, Token* token_arr, size_t arr_sz) {
-	FILE* outfile = fopen(filename, "wb");
+void dump_lexer_tokens(FILE* outfile, Token* token_arr, size_t arr_sz) {
 	Token* tok = token_arr;
 	for (size_t x = 0; x < arr_sz; x++) {
 		tok = (token_arr + x);
@@ -230,5 +229,4 @@ void dump_lexer_tokens(char* filename, Token* token_arr, size_t arr_sz) {
 				tok->type, getStr_token_t(tok->type), tok->content
 				);
 	}
-	fclose(outfile);
 }

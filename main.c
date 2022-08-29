@@ -129,12 +129,14 @@ int main(/*int argc, char* argv[]*/) {
 
 	size_t num_tok = 0;
 	Token* tok = lexer_tokenize_all(lex, &num_tok);
-	
-	for (size_t x = 0; x < num_tok; x++) {
-		fprintf(stdout, "type: %-22s content: '%s'\n", getStr_token_t((tok+x)->type), (tok+x)->content);
+	{
+		fprintf(stdout, "=== LEXER ===\n");
+		FILE* outfile = fopen("lexer.out", "wb");
+		dump_lexer_tokens(stdout, tok, num_tok);
+		fprintf(stdout, "Remaining in lexer: '%s'\n", lex->line + lex->char_offset);
+		dump_lexer_tokens(outfile, tok, num_tok);
+		fclose(outfile);
 	}
-	fprintf(stdout, "Remaining in lexer: '%s'\n", lex->line + lex->char_offset);
-	dump_lexer_tokens("lexer.out", tok, num_tok);
 
 	ASTNode* test = make_astnode(tok);
 	ASTNode* test1 = make_astnode(tok+1);
@@ -142,6 +144,7 @@ int main(/*int argc, char* argv[]*/) {
 	hang_right(test, test1);
 	hang_left(test, test2);
 	FILE* fp = fopen("ast.dump", "w");
+	fprintf(stdout, "\n=== PARSER ===\n");
 	dump_tree(stdout, test);
 	fclose(fp);
 
