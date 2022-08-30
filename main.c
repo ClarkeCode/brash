@@ -81,6 +81,15 @@ void hang_right(ASTNode* parent, ASTNode* child) {
 	parent->right = child;
 	child->parent = parent;
 }
+ASTNode* get_astroot(ASTNode* node) {
+	if (!node) return NULL;
+	ASTNode* root = node;
+	while(true) {
+		if (!node->parent) break;
+		node = node->parent;
+	}
+	return root;
+}
 
 typedef struct {
 	Token* feed_tape;
@@ -100,6 +109,9 @@ Token* parser_current_token(Parser* parser) {
 }
 void parser_advance_tape(Parser* parser) { parser->tape_offset++; }
 
+void _insert_by_precedence(ASTNode* node, ASTNode* current_node) {
+	ASTNode* greg = node;
+}
 ASTNode* parse_ast(Parser* parser, token_t terminator) {
 	if (!parser || !parser->feed_tape || parser->tape_size == 0) return NULL;
 	ASTNode* active_node = NULL;
@@ -112,8 +124,11 @@ ASTNode* parse_ast(Parser* parser, token_t terminator) {
 		if (!active_node) {
 			active_node = curr_node;
 		}
+		//TODO: rotate by precedence
+		else if (get_precedence(curr_node) > get_precedence(active_node)) {
+
+		}
 		else {
-			//TODO: rotate by precedence
 			hang_right(active_node, curr_node);
 			active_node = curr_node;
 		}
@@ -121,12 +136,7 @@ ASTNode* parse_ast(Parser* parser, token_t terminator) {
 		parser_advance_tape(parser);
 	}
 
-	while(true) {
-		if (!active_node->parent) break;
-		active_node = active_node->parent;
-	}
-	
-	return active_node;
+	return get_astroot(active_node);
 }
 
 
