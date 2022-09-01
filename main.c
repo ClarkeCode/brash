@@ -83,12 +83,11 @@ void hang_right(ASTNode* parent, ASTNode* child) {
 }
 ASTNode* get_astroot(ASTNode* node) {
 	if (!node) return NULL;
-	ASTNode* root = node;
-	while(true) {
-		if (!node->parent) break;
-		node = node->parent;
+	ASTNode* root_candidate = node;
+	while (root_candidate->parent) {
+		root_candidate = root_candidate->parent;
 	}
-	return root;
+	return root_candidate;
 }
 
 typedef struct {
@@ -109,8 +108,17 @@ Token* parser_current_token(Parser* parser) {
 }
 void parser_advance_tape(Parser* parser) { parser->tape_offset++; }
 
-void _insert_by_precedence(ASTNode* node, ASTNode* current_node) {
-	ASTNode* greg = node;
+ASTNode* _insert_by_precedence(ASTNode* active_node, ASTNode* current_node) {
+	if (get_precedence(current_node) <= get_precedence(active_node)) {
+		hang_right(active_node, current_node);
+		return current_node;
+	}
+
+	if (!active_node->parent) {
+		hang_left(current_node, active_node);
+		return current_node;
+	}
+	return _insert_by_precedence(active_node->parent, current_node);
 }
 ASTNode* parse_ast(Parser* parser, token_t terminator) {
 	if (!parser || !parser->feed_tape || parser->tape_size == 0) return NULL;
@@ -120,17 +128,13 @@ ASTNode* parse_ast(Parser* parser, token_t terminator) {
 			(parser_current_token(parser) && parser_current_token(parser)->type != terminator)) {
 		Token* curr_token = parser_current_token(parser);
 		ASTNode* curr_node = make_astnode(curr_token);
-		
+
+		//First node
 		if (!active_node) {
 			active_node = curr_node;
 		}
-		//TODO: rotate by precedence
-		else if (get_precedence(curr_node) > get_precedence(active_node)) {
-
-		}
 		else {
-			hang_right(active_node, curr_node);
-			active_node = curr_node;
+			active_node = _insert_by_precedence(active_node, curr_node);
 		}
 
 		parser_advance_tape(parser);
@@ -177,6 +181,7 @@ int main(/*int argc, char* argv[]*/) {
 }
 
 void dump_node(FILE* fp, ASTNode* ast) {
+	//printf("Node: %p\n\t%p %p %p\n\n", ast, ast->parent, ast->left, ast->right);
 	if (!ast) fprintf(fp, "ERROR\n");
 	fprintf(fp, "\t\"%s:%d:%d\" ", ast->token->origin_file, ast->token->origin_line, ast->token->origin_char);
 	fprintf(fp, "[label=\"'%s'\\n%s\\n%s:%d:%d\"",
