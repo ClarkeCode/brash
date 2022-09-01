@@ -7,20 +7,30 @@ LINKERFLAGS = -lm
 SRCS := $(wildcard *.c) 
 OBJS := $(SRCS:%.c=%.o)
 
-all: main
+MAKE = make --no-print-directory
 
-main: clean generated $(OBJS)
+FINAL_TARGET = brash
+
+
+#Rules
+
+all: build
+
+build: $(SRCS)
+	@$(MAKE) -B generated
+	@$(MAKE) $(FINAL_TARGET)
+
+generated:
+	./header_generator.sh lexer.c BRASH_LEXER > lexer.h
+	./generate_enumeration_lookups.sh enumerations.h > enum_lookups.c
+	./header_generator.sh enum_lookups.c ENUM_LOOKUPS > enum_lookups.h
+
+$(FINAL_TARGET): $(OBJS)
 	$(CC) $(LINKERFLAGS) $(OBJS) -o $@
-
 
 %.o: %.c
 	$(CC) $(COMPILERFLAGS) $<
 
-generated: lexer.c
-	./header_generator.sh lexer.c BRASH_LEXER #generates lexer.h
-	./generate_enumeration_lookups.sh enumerations.h > enum_lookups.c
-	./header_generator.sh enum_lookups.c ENUM_LOOKUPS > enum_lookups.h
-
 clean:
-	rm -f *.out main *.o
+	rm -f *.out *.o $(FINAL_TARGET)
 	rm -f lexer.h enum_lookups.h enum_lookups.c

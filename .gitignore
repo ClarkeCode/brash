@@ -2,7 +2,7 @@
 *.o
 *.aux
 *.log
-main
+brash
 
 enum_lookups.*
 lexer.h
