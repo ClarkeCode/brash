@@ -12,8 +12,11 @@
 
 
 
-int main(/*int argc, char* argv[]*/) {
-	char* program = "2 + 3 * 4";
+int main(int argc, char* argv[]) {
+
+	char* program;
+	if (argc > 1) { program = argv[1]; }
+	else          { program = "2 + 3 * 4"; }
 	
 	Lexer* lex = make_lexer(program, "notfile", 0);
 

@@ -2,12 +2,7 @@
 #define BRASH_PARSER_AST
 #include <stddef.h>
 
-typedef enum {
-	TYPE_NOT_VALUE,
-	TYPE_BOOL,
-	TYPE_NUMBER,
-	TYPE_STRING
-} Datatype;
+#include "value.h"
 
 typedef struct {
 	Token* feed_tape;
@@ -17,7 +12,7 @@ typedef struct {
 
 typedef struct ASTNode_ {
 	Token* token;
-	Datatype datatype;
+	Value value;
 	struct ASTNode_* parent;
 	struct ASTNode_* left;
 	struct ASTNode_* right;

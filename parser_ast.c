@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h> //strtod, strcmp
 #include "structs.h"
 #include "parser_ast.h"
 #include "enum_lookups.h"
@@ -61,6 +62,26 @@ void dump_tree(FILE* fp, ASTNode* rootNode) {
 	fprintf(fp, "}\n");
 }
 
+
+void _init_value_from_token(Value* val, Token* token) {
+	switch (token->type) {
+		case NUMBER:  {
+				val->type = TYPE_NUMBER;
+				val->as.number = strtod(token->content, NULL);
+			} break;
+		case BOOLEAN: {
+				val->type = TYPE_BOOL;
+				val->as.boolean = strcmp(token->content, "true") == 0 ? true : false;
+			} break;
+		case STRING:  {
+				val->type = TYPE_STRING;
+				val->as.string = token->content;
+			} break;
+		default:
+				val->type = TYPE_NOT_VALUE;
+	}
+}
+
 ASTNode* make_astnode(Token* token) {
 	if (!token) return NULL;
 	ASTNode* ast = (ASTNode*) calloc(1, sizeof(ASTNode));
@@ -69,10 +90,8 @@ ASTNode* make_astnode(Token* token) {
 	ast->left = NULL;
 	ast->right = NULL;
 
-	if (token->type == NUMBER) ast->datatype = TYPE_NUMBER;
-	else if (token->type == BOOLEAN) ast->datatype = TYPE_BOOL;
-	else if (token->type == STRING) ast->datatype = TYPE_STRING;
-	else ast->datatype = TYPE_NOT_VALUE;
+	//ast->value = 0;
+	_init_value_from_token(&(ast->value), ast->token);
 	return ast;
 }
 void free_astnode(ASTNode* node) {
