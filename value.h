@@ -1,6 +1,6 @@
 typedef enum {
 	TYPE_NOT_VALUE,
-	TYPE_BOOL,
+	TYPE_BOOLEAN,
 	TYPE_NUMBER,
 	TYPE_STRING
 } value_t;
