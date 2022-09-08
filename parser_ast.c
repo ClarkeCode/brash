@@ -70,7 +70,7 @@ void _init_value_from_token(Value* val, Token* token) {
 				val->as.number = strtod(token->content, NULL);
 			} break;
 		case BOOLEAN: {
-				val->type = TYPE_BOOL;
+				val->type = TYPE_BOOLEAN;
 				val->as.boolean = strcmp(token->content, "true") == 0 ? true : false;
 			} break;
 		case STRING:  {
