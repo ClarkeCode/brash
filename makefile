@@ -4,8 +4,9 @@ CC = gcc -g -Wall -Wextra
 COMPILERFLAGS = -c
 LINKERFLAGS = -lm
 
+BUILDDIR := build
 SRCS := $(wildcard *.c) 
-OBJS := $(SRCS:%.c=%.o)
+OBJS := $(SRCS:%.c=$(BUILDDIR)/%.o)
 
 MAKE = make --no-print-directory
 
@@ -17,6 +18,7 @@ FINAL_TARGET = brash
 all: build
 
 build: $(SRCS)
+	@mkdir -p $(BUILDDIR)
 	@$(MAKE) -B generated
 	@$(MAKE) $(FINAL_TARGET)
 
@@ -28,9 +30,10 @@ generated:
 $(FINAL_TARGET): $(OBJS)
 	$(CC) $(LINKERFLAGS) $(OBJS) -o $@
 
-%.o: %.c
-	$(CC) $(COMPILERFLAGS) $<
+$(BUILDDIR)/%.o: %.c
+	$(CC) $(COMPILERFLAGS) $< -o $@
 
 clean:
 	rm -f *.out *.o $(FINAL_TARGET)
+	rm -rf build
 	rm -f lexer.h enum_lookups.h enum_lookups.c
