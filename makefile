@@ -28,7 +28,7 @@ generated:
 	./header_generator.sh enum_lookups.c ENUM_LOOKUPS > enum_lookups.h
 
 $(FINAL_TARGET): $(OBJS)
-	$(CC) $(LINKERFLAGS) $(OBJS) -o $@
+	$(CC) $(OBJS) -o $@ $(LINKERFLAGS)
 
 $(BUILDDIR)/%.o: %.c
 	$(CC) $(COMPILERFLAGS) $< -o $@
