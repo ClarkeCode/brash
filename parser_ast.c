@@ -9,25 +9,25 @@
 
 size_t get_precedence(ASTNode* node) {
 	assert(ALL_TOKENS == 24 && "Exhaustive handling of precedence");
-	if (node->token->type == PAREN_OPEN)             { return 17; }
+	if (node->token->type == PAREN_OPEN)             { return 1; }
 	//Placeholder: Bitwise Complement, Arithmetic Negation
-	if (node->token->type == LOGICAL_NOT)            { return 16; }
-	if (node->token->type == OPERATOR_MULTIPLY)      { return 15; }
-	if (node->token->type == OPERATOR_DIVIDE)        { return 14; }
-	if (node->token->type == OPERATOR_MODULO)        { return 13; }
-	if (node->token->type == OPERATOR_ADD)           { return 12; }
-	if (node->token->type == OPERATOR_SUB)           { return 11; }
+	if (node->token->type == LOGICAL_NOT)            { return 2; }
+	if (node->token->type == OPERATOR_MULTIPLY)      { return 3; }
+	if (node->token->type == OPERATOR_DIVIDE)        { return 4; }
+	if (node->token->type == OPERATOR_ADD)           { return 5; }
+	if (node->token->type == OPERATOR_SUB)           { return 6; }
+	if (node->token->type == OPERATOR_MODULO)        { return 7; }
 	//Placeholder: Bitwise AND/OR/XOR
-	if (node->token->type == LOGICAL_AND)            { return 10; }
-	if (node->token->type == LOGICAL_OR)             { return 9; }
-	if (node->token->type == LOGICAL_XOR)            { return 8; }
-	if (node->token->type == OPERATOR_LESSER)        { return 7; }
-	if (node->token->type == OPERATOR_GREATER)       { return 6; }
-	if (node->token->type == OPERATOR_LESSER_EQUAL)  { return 5; }
-	if (node->token->type == OPERATOR_GREATER_EQUAL) { return 4; }
-	if (node->token->type == OPERATOR_EQUALITY)      { return 3; }
-	if (node->token->type == OPERATOR_INEQUALITY)    { return 2; }
-	if (node->token->type == OPERATOR_ASSIGNMENT)    { return 1; }
+	if (node->token->type == OPERATOR_LESSER)        { return 8; }
+	if (node->token->type == OPERATOR_GREATER)       { return 9; }
+	if (node->token->type == OPERATOR_LESSER_EQUAL)  { return 10; }
+	if (node->token->type == OPERATOR_GREATER_EQUAL) { return 11; }
+	if (node->token->type == OPERATOR_EQUALITY)      { return 12; }
+	if (node->token->type == LOGICAL_XOR)            { return 13; }
+	if (node->token->type == LOGICAL_OR)             { return 14; }
+	if (node->token->type == LOGICAL_AND)            { return 15; }
+	if (node->token->type == OPERATOR_INEQUALITY)    { return 16; }
+	if (node->token->type == OPERATOR_ASSIGNMENT)    { return 17; }
 	return 0;
 }
 
@@ -105,6 +105,9 @@ void hang_left(ASTNode* parent, ASTNode* child) {
 	child->parent = parent;
 }
 void hang_right(ASTNode* parent, ASTNode* child) {
+	if (parent->right) {
+		child->left = parent->right;
+	}
 	parent->right = child;
 	child->parent = parent;
 }
