@@ -194,6 +194,21 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 			fprintf(fp, "LOGICAL_NOT\n");
 			push(terp, nval, fp);
 		} break;
+
+		case IDENTIFIER:
+		case OPERATOR_ASSIGNMENT: {
+			assert(true && "NOT IMPLEMENTED");
+		} break;
+
+		case STRING:
+		case NUMBER:
+		case BOOLEAN:
+		case PAREN_OPEN:
+		case PAREN_CLOSE:
+		case BRACE_OPEN:
+		case BRACE_CLOSE:
+		case ALL_TOKENS:
+			break;
 	}
 }
 
