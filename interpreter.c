@@ -24,6 +24,7 @@ void dump_value(FILE* fp, Value* val) {
 Interpreter* make_interpreter() {
 	Interpreter* terp = (Interpreter*) calloc(1, sizeof(Interpreter));
 	terp->lookup = make_variable_lookup();
+	terp->_top_index = 0;
 	terp->_max_index = 256;
 	terp->_stack = (Value*) calloc(terp->_max_index, sizeof(Value));
 	return terp;
@@ -76,7 +77,7 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 			Value rval = pop(terp, fp);
 			Value lval = pop(terp, fp);
 			Value nval = {TYPE_NUMBER, {.number=(lval.as.number + rval.as.number)}};
-			fprintf(fp, "ADD\n");
+			if(fp) fprintf(fp, "ADD\n");
 			push(terp, nval, fp);
 		} break;
 
@@ -84,7 +85,7 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 			Value rval = pop(terp, fp);
 			Value lval = pop(terp, fp);
 			Value nval = {TYPE_NUMBER, {.number=(lval.as.number - rval.as.number)}};
-			fprintf(fp, "SUBTRACT\n");
+			if(fp) fprintf(fp, "SUBTRACT\n");
 			push(terp, nval, fp);
 		} break;
 
@@ -92,7 +93,7 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 			Value rval = pop(terp, fp);
 			Value lval = pop(terp, fp);
 			Value nval = {TYPE_NUMBER, {.number=(lval.as.number * rval.as.number)}};
-			fprintf(fp, "MULTIPLY\n");
+			if(fp) fprintf(fp, "MULTIPLY\n");
 			push(terp, nval, fp);
 		} break;
 
@@ -100,7 +101,7 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 			Value rval = pop(terp, fp);
 			Value lval = pop(terp, fp);
 			Value nval = {TYPE_NUMBER, {.number=(lval.as.number / rval.as.number)}};
-			fprintf(fp, "DIVIDE\n");
+			if(fp) fprintf(fp, "DIVIDE\n");
 			push(terp, nval, fp);
 		} break;
 
@@ -108,7 +109,7 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 			Value rval = pop(terp, fp);
 			Value lval = pop(terp, fp);
 			Value nval = {TYPE_NUMBER, {.number=(fmod(lval.as.number, rval.as.number))}};
-			fprintf(fp, "MODULO\n");
+			if(fp) fprintf(fp, "MODULO\n");
 			push(terp, nval, fp);
 		} break;
 
@@ -116,7 +117,7 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 			Value rval = pop(terp, fp);
 			Value lval = pop(terp, fp);
 			Value nval = {TYPE_BOOLEAN, {.boolean=(lval.as.number == rval.as.number)}};
-			fprintf(fp, "EQUALITY\n");
+			if(fp) fprintf(fp, "EQUALITY\n");
 			push(terp, nval, fp);
 		} break;
 
@@ -124,7 +125,7 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 			Value rval = pop(terp, fp);
 			Value lval = pop(terp, fp);
 			Value nval = {TYPE_BOOLEAN, {.boolean=(lval.as.number != rval.as.number)}};
-			fprintf(fp, "INEQUALITY\n");
+			if(fp) fprintf(fp, "INEQUALITY\n");
 			push(terp, nval, fp);
 		} break;
 
@@ -132,7 +133,7 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 			Value rval = pop(terp, fp);
 			Value lval = pop(terp, fp);
 			Value nval = {TYPE_BOOLEAN, {.boolean=(lval.as.number < rval.as.number)}};
-			fprintf(fp, "LESSER\n");
+			if(fp) fprintf(fp, "LESSER\n");
 			push(terp, nval, fp);
 		} break;
 
@@ -140,7 +141,7 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 			Value rval = pop(terp, fp);
 			Value lval = pop(terp, fp);
 			Value nval = {TYPE_BOOLEAN, {.boolean=(lval.as.number > rval.as.number)}};
-			fprintf(fp, "GREATER\n");
+			if(fp) fprintf(fp, "GREATER\n");
 			push(terp, nval, fp);
 		} break;
 
@@ -148,7 +149,7 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 			Value rval = pop(terp, fp);
 			Value lval = pop(terp, fp);
 			Value nval = {TYPE_BOOLEAN, {.boolean=(lval.as.number <= rval.as.number)}};
-			fprintf(fp, "LESSER_EQUAL\n");
+			if(fp) fprintf(fp, "LESSER_EQUAL\n");
 			push(terp, nval, fp);
 		} break;
 
@@ -156,7 +157,7 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 			Value rval = pop(terp, fp);
 			Value lval = pop(terp, fp);
 			Value nval = {TYPE_BOOLEAN, {.boolean=(lval.as.number >= rval.as.number)}};
-			fprintf(fp, "GREATER_EQUAL\n");
+			if(fp) fprintf(fp, "GREATER_EQUAL\n");
 			push(terp, nval, fp);
 		} break;
 
@@ -164,7 +165,7 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 			Value rval = pop(terp, fp);
 			Value lval = pop(terp, fp);
 			Value nval = {TYPE_BOOLEAN, {.boolean=(lval.as.boolean && rval.as.boolean)}};
-			fprintf(fp, "LOGICAL_AND\n");
+			if(fp) fprintf(fp, "LOGICAL_AND\n");
 			push(terp, nval, fp);
 		} break;
 
@@ -172,7 +173,7 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 			Value rval = pop(terp, fp);
 			Value lval = pop(terp, fp);
 			Value nval = {TYPE_BOOLEAN, {.boolean=(lval.as.boolean || rval.as.boolean)}};
-			fprintf(fp, "LOGICAL_OR\n");
+			if(fp) fprintf(fp, "LOGICAL_OR\n");
 			push(terp, nval, fp);
 		} break;
 
@@ -180,14 +181,14 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 			Value rval = pop(terp, fp);
 			Value lval = pop(terp, fp);
 			Value nval = {TYPE_BOOLEAN, {.boolean=(lval.as.boolean ^  rval.as.boolean)}};
-			fprintf(fp, "LOGICAL_XOR\n");
+			if(fp) fprintf(fp, "LOGICAL_XOR\n");
 			push(terp, nval, fp);
 		} break;
 
 		case LOGICAL_NOT: {
 			Value rval = pop(terp, fp);
 			Value nval = {TYPE_BOOLEAN, {.boolean=(!rval.as.boolean)}};
-			fprintf(fp, "LOGICAL_NOT\n");
+			if(fp) fprintf(fp, "LOGICAL_NOT\n");
 			push(terp, nval, fp);
 		} break;
 
@@ -204,7 +205,9 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 		} break;
 
 		case IDENTIFIER: {
-			fprintf(stderr, "NOT IMPLEMENTED");
+			if (lookup_has(terp->lookup, node->token->content)) {
+				push(terp, lookup_get(terp->lookup, node->token->content), fp);
+			}
 		} break;
 
 		case STRING:
