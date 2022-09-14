@@ -9,7 +9,6 @@
 #include "lexer.h"
 #include "parser_ast.h"
 #include "interpreter.h"
-#include "variablelookup.h"
 
 
 int main(int argc, char* argv[]) {
