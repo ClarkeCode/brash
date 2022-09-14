@@ -191,9 +191,20 @@ void interpret(Interpreter* terp, ASTNode* node, FILE* fp) {
 			push(terp, nval, fp);
 		} break;
 
-		case IDENTIFIER:
 		case OPERATOR_ASSIGNMENT: {
-			assert(true && "NOT IMPLEMENTED");
+			Value val = pop(terp, fp);
+			//TODO: check node->left is an identifier
+			lookup_add(terp->lookup, node->left->token->content, val);
+			if (fp) {
+				fprintf(fp, "ASSIGN_VARIABLE ");
+				fprintf(fp, "'%s': - ", node->left->token->content);
+				dump_value(fp, &val);
+				fprintf(fp, "\n");
+			}
+		} break;
+
+		case IDENTIFIER: {
+			fprintf(stderr, "NOT IMPLEMENTED");
 		} break;
 
 		case STRING:
