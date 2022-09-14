@@ -8,6 +8,7 @@
 #include "enumerations.h"
 #include "parser_ast.h"
 #include "interpreter.h"
+#include "variablelookup.h"
 
 void dump_value(FILE* fp, Value* val) {
 		if (val->type == TYPE_NUMBER)
@@ -22,12 +23,14 @@ void dump_value(FILE* fp, Value* val) {
 
 Interpreter* make_interpreter() {
 	Interpreter* terp = (Interpreter*) calloc(1, sizeof(Interpreter));
+	terp->lookup = make_variable_lookup();
 	terp->_max_index = 256;
 	terp->_stack = (Value*) calloc(terp->_max_index, sizeof(Value));
 	return terp;
 }
 void free_interpreter(Interpreter* terp) {
 	if (!terp) return;
+	if (terp->lookup) free_variable_lookup(terp->lookup);
 	if (terp->_stack) free(terp->_stack);
 	if (terp) free(terp);
 }
@@ -37,6 +40,7 @@ void dump_interpreter(FILE* fp, Interpreter* terp) {
 		dump_value(fp, terp->_stack + x);
 		fprintf(fp, "\n");
 	}
+	dump_variable_lookup(fp, terp->lookup);
 }
 
 Value pop(Interpreter* terp, FILE* fp) {

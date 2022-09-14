@@ -54,22 +54,6 @@ int main(int argc, char* argv[]) {
 		dump_interpreter(stdout, terp);
 	}
 
-	VariableLookup* lookup = make_variable_lookup();
-	Value v1 = {TYPE_BOOLEAN, {.boolean=true}};
-	Value v2 = {TYPE_NUMBER, {.number=6.22}};
-	Value v3 = {TYPE_STRING, {.string="Another thing more"}};
-	lookup_add(lookup, "Testing", v1);
-	lookup_add(lookup, "Greggs", v2);
-	lookup_add(lookup, "More", v3);
-
-	Value v8 = lookup_get(lookup, "More");
-	dump_value(stdout, &v8);
-	fprintf(stdout, "\n");
-	fprintf(stdout, "%d %d\n", lookup_has(lookup, "More"), lookup_has(lookup, "Morea"));
-
-	dump_variable_lookup(stdout, lookup);
-	free_variable_lookup(lookup);
-
 	
 	//Free allocated memory
 	free_interpreter(terp);

@@ -67,6 +67,7 @@ bool lookup_has(VariableLookup* lookup, char* lookupkey) {
 }
 
 void dump_variable_lookup(FILE* fp, VariableLookup* lookup) {
+	fprintf(fp, "-- Symbol lookup --\n");
 	for (size_t x = 0; x < lookup->_internal_size; x++) {
 		fprintf(fp, "%-10s ", lookup->_names[x]);
 		dump_value(fp, lookup->_values + x);
