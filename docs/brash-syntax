@@ -1,0 +1,37 @@
+Function:
+
+func function-name (parameter-list) {
+	BLOCK
+}
+
+
+If statement:
+
+if bool-convertable-expression {
+	BLOCK
+}
+
+
+
+If-else statement:
+
+if bool-convertable-expression {
+	BLOCK
+}
+else {
+	BLOCK
+}
+
+
+
+If-elseif-else statement:
+
+if bool-converable-expression {
+	BLOCK
+}
+else if bool-convertable-expression {
+	BLOCK
+}
+else {
+	BLOCK
+}
