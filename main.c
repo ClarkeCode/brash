@@ -10,57 +10,97 @@
 #include "parser_ast.h"
 #include "interpreter.h"
 
+char* retrieveLine(FILE* stream) {
+	char* line = malloc(100 * sizeof(char));
+	size_t lsize = 0;
+	size_t lcapacity = 100;
 
-int main(int argc, char* argv[]) {
+	if (line == NULL) return NULL; //Malloc failure
 
-	char* program;
-	if (argc > 1) { program = argv[1]; }
-	else          { program = "greg = !false ^^ 1+2/3-9 >= 4*5 && true"; }
+	while (true) {
+		if (lsize == lcapacity) {
+			lcapacity *= 2;
+			char* nline = realloc(line, lcapacity);
+			if (nline == NULL) { //Realloc failure
+				free(line);
+				return NULL;
+			}
+		}
 
-	fprintf(stdout, "Program: %s\n\n", program);
-	
-	Lexer* lex = make_lexer(program, "notfile", 0);
-
-	size_t num_tok = 0;
-	Token* tok = lexer_tokenize_all(lex, &num_tok);
-	{
-		fprintf(stdout, "=== LEXER ===\n");
-		dump_lexer_tokens(stdout, tok, num_tok);
-		fprintf(stdout, "Remaining in lexer: '%s'\n", lex->line + lex->char_offset);
-
-		FILE* outfile = fopen("lexer.out", "wb");
-		dump_lexer_tokens(outfile, tok, num_tok);
-		fclose(outfile);
+		int c = fgetc(stream);
+		if (c == EOF) break;
+		if (c == '\n') break;
+		line[lsize++] = c;
 	}
+	line[lsize] = '\0';
+	return line;
+}
 
-	Parser* parser = make_parser(tok, num_tok);
-	ASTNode* ast = parse_ast(parser, -1);
-	{
-		FILE* fp = fopen("ast.out", "w");
-		fprintf(fp, "\n=== PARSER ===\n");
-		dump_tree(fp, ast);
-		fclose(fp);
+void dump_value_notype(FILE* fp, Value* val) {
+		if (val->type == TYPE_NUMBER)
+			fprintf(fp, "%f", val->as.number);
+		else if (val->type == TYPE_BOOLEAN)
+			fprintf(fp, "%s", val->as.boolean ? "true" : "false");
+		else if (val->type == TYPE_STRING)
+			fprintf(fp, "%s", val->as.string);
+}
 
-		fprintf(stdout, "\n=== PARSER ===\n");
-		dump_tree(stdout, ast);
-	}
+int main(/*int argc, char* argv[]*/) {
 
 	Interpreter* terp = make_interpreter();
-	{
-		fprintf(stdout, "\n=== INTERPRETER ===\n");
-		interpret(terp, ast, stdout);
-		fprintf(stdout, "\nInterpreter value stack final state:\n");
-		dump_interpreter(stdout, terp);
+	while (!lookup_has(terp->lookup, "quit")) {
+		fprintf(stdout, "brash> ");
+		char* line = retrieveLine(stdin);
+
+
+		Lexer* lex = make_lexer(line, "notfile", 0);
+
+		size_t num_tok = 0;
+		Token* tok = lexer_tokenize_all(lex, &num_tok);
+		{
+			//fprintf(stdout, "=== LEXER ===\n");
+			//dump_lexer_tokens(stdout, tok, num_tok);
+			//fprintf(stdout, "Remaining in lexer: '%s'\n", lex->line + lex->char_offset);
+
+			FILE* outfile = fopen("lexer.out", "wb");
+			dump_lexer_tokens(outfile, tok, num_tok);
+			fclose(outfile);
+		}
+		Parser* parser = make_parser(tok, num_tok);
+		ASTNode* ast = parse_ast(parser, -1);
+		{
+			FILE* fp = fopen("ast.out", "wb");
+			fprintf(fp, "\n=== PARSER ===\n");
+			dump_tree(fp, ast);
+			fclose(fp);
+
+			//fprintf(stdout, "\n=== PARSER ===\n");
+			//dump_tree(stdout, ast);
+		}
+
+
+
+		interpret(terp, ast, NULL);
+
+		while (terp->_top_index != 0) {
+			Value val = pop(terp, NULL);
+			dump_value_notype(stdout, &val);
+			printf("\n");
+		}
+
+		//Free allocated memory
+		free(parser);
+		free_astnode(ast);
+		for (size_t x = 0; x < num_tok; x++) free((tok+x)->content);
+		free(tok);
+		free(lex);
+		if (line) free(line);
 	}
 
-	
-	//Free allocated memory
-	free_interpreter(terp);
-	free(parser);
-	free_astnode(ast);
-	for (size_t x = 0; x < num_tok; x++) free((tok+x)->content);
-	free(tok);
-	free(lex);
+	fprintf(stdout, "\n=== INTERPRETER ===\n");
+	fprintf(stdout, "Interpreter final state:\n");
+	dump_interpreter(stdout, terp);
 
+	free_interpreter(terp);
 	return 0;
 }
