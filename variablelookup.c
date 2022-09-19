@@ -5,8 +5,42 @@
 #include "enumerations.h"
 #include "interpreter.h"
 
+StringInternment* make_string_internment() {
+	StringInternment* internment = (StringInternment*) malloc(sizeof(StringInternment));
+	internment->size = 0;
+	internment->capacity = 10;
+	internment->strings = (char**) calloc(internment->capacity, sizeof(char*));
+	return internment;
+}
+void free_string_internment(StringInternment* si) {
+	if (!si) return;
+	for (size_t x = 0; x < si->size; x++) {
+		if (si->strings[x]) free(si->strings[x]);
+	}
+	if (si->strings) free(si->strings);
+	if (si) free(si);
+}
+char* intern_string(VariableLookup* lookup, char* string) {
+	StringInternment* intern = lookup->_internment;
+	if (intern->size == intern->capacity) {
+		intern->capacity *= 2;
+	}
+	size_t x = 0;
+	for (; x < intern->size; x++) {
+		if (strcmp(string, intern->strings[x]) == 0) {
+			return intern->strings[x];
+		}
+	}
+	
+	intern->strings[x] = (char*) calloc(strlen(string)+1, sizeof(char));
+	strcpy(intern->strings[x], string);
+	intern->size++;
+	return intern->strings[x];
+}
+
 VariableLookup* make_variable_lookup() {
 	VariableLookup* lookup = (VariableLookup*) calloc(1, sizeof(VariableLookup));
+	lookup->_internment = (StringInternment*) make_string_internment();
 	lookup->_name_capacity = 2;
 	lookup->_internal_size = 0;
 	lookup->_names = (char**) malloc(lookup->_name_capacity * sizeof(char*));
@@ -15,9 +49,7 @@ VariableLookup* make_variable_lookup() {
 }
 void free_variable_lookup(VariableLookup* lookup) {
 	if (!lookup) return;
-	for (size_t x = 0; x < lookup->_internal_size; x++) {
-		if (lookup->_names[x]) free(lookup->_names[x]);
-	}
+	free_string_internment(lookup->_internment);
 	if (lookup->_values) free(lookup->_values);
 	if (lookup->_names) free(lookup->_names);
 	if (lookup) free(lookup);
@@ -44,9 +76,12 @@ void lookup_add(VariableLookup* lookup, char* name, Value val) {
 		}
 	}
 
-	lookup->_names[lookup->_internal_size] = malloc(strlen(name) * sizeof(char) + 1);
-	strcpy(lookup->_names[lookup->_internal_size], name);
-	lookup->_values[lookup->_internal_size] = val; //Copy value
+	lookup->_names[lookup->_internal_size] = intern_string(lookup, name);
+	Value* nval = lookup->_values + lookup->_internal_size;
+	*nval = val; //Copy value
+	if (nval->type == TYPE_STRING) {
+		nval->as.string = intern_string(lookup, val.as.string);
+	}
 	lookup->_internal_size++;
 }
 
