@@ -1,24 +1,7 @@
 #ifndef BRASH_PARSER_AST
 #define BRASH_PARSER_AST
 #include <stddef.h>
-
-#include "value.h"
-
-typedef struct {
-	Token* feed_tape;
-	size_t tape_size;
-	size_t tape_offset;
-} Parser;
-
-typedef struct ASTNode_ {
-	Token* token;
-	Value value;
-	struct ASTNode_* parent;
-	struct ASTNode_* left;
-	struct ASTNode_* right;
-} ASTNode;
-
-
+#include "structs.h"
 
 size_t get_precedence(ASTNode* node);
 void dump_node(FILE* fp, ASTNode* ast);

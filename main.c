@@ -9,6 +9,7 @@
 #include "lexer.h"
 #include "parser_ast.h"
 #include "interpreter.h"
+#include "variablelookup.h"
 
 char* retrieveLine(FILE* stream) {
 	char* line = malloc(100 * sizeof(char));

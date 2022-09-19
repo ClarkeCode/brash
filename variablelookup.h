@@ -6,15 +6,7 @@
 #include <string.h>
 
 #include "structs.h"
-#include "parser_ast.h"
 
-typedef struct {
-	char** _names;
-	size_t _name_capacity;
-	size_t _internal_size;
-
-	Value* _values;
-} VariableLookup;
 
 VariableLookup* make_variable_lookup();
 void free_variable_lookup(VariableLookup* lookup);

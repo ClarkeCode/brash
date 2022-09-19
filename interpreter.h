@@ -4,15 +4,6 @@
 #include "structs.h"
 #include "enumerations.h"
 #include "parser_ast.h"
-#include "variablelookup.h"
-
-typedef struct {
-	VariableLookup* lookup;
-
-	Value* _stack;
-	size_t _top_index;
-	size_t _max_index;
-} Interpreter;
 
 void dump_value(FILE* fp, Value* val);
 Interpreter* make_interpreter();
