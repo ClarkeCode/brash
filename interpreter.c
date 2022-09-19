@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h> //assert
@@ -10,16 +9,7 @@
 #include "interpreter.h"
 #include "variablelookup.h"
 
-void dump_value(FILE* fp, Value* val) {
-		if (val->type == TYPE_NUMBER)
-			fprintf(fp, "%-10s %f", "NUMBER",  val->as.number);
-		else if (val->type == TYPE_BOOLEAN)
-			fprintf(fp, "%-10s %s", "BOOLEAN", val->as.boolean ? "true" : "false");
-		else if (val->type == TYPE_STRING)
-			fprintf(fp, "%-10s %s", "STRING",  val->as.string);
-		else
-			fprintf(fp, "%-10s", "NON-VALUE");
-}
+#include "dumpfunctions.h"
 
 Interpreter* make_interpreter() {
 	Interpreter* terp = (Interpreter*) calloc(1, sizeof(Interpreter));
@@ -34,14 +24,6 @@ void free_interpreter(Interpreter* terp) {
 	if (terp->lookup) free_variable_lookup(terp->lookup);
 	if (terp->_stack) free(terp->_stack);
 	if (terp) free(terp);
-}
-void dump_interpreter(FILE* fp, Interpreter* terp) {
-	for (size_t x = 0; x < terp->_top_index; x++) {
-		fprintf(fp, "%3d ", x);
-		dump_value(fp, terp->_stack + x);
-		fprintf(fp, "\n");
-	}
-	dump_variable_lookup(fp, terp->lookup);
 }
 
 Value pop(Interpreter* terp, FILE* fp) {

@@ -11,6 +11,7 @@
 #include "interpreter.h"
 #include "variablelookup.h"
 
+#include "dumpfunctions.h"
 char* retrieveLine(FILE* stream) {
 	char* line = malloc(100 * sizeof(char));
 	size_t lsize = 0;
@@ -35,15 +36,6 @@ char* retrieveLine(FILE* stream) {
 	}
 	line[lsize] = '\0';
 	return line;
-}
-
-void dump_value_notype(FILE* fp, Value* val) {
-		if (val->type == TYPE_NUMBER)
-			fprintf(fp, "%f", val->as.number);
-		else if (val->type == TYPE_BOOLEAN)
-			fprintf(fp, "%s", val->as.boolean ? "true" : "false");
-		else if (val->type == TYPE_STRING)
-			fprintf(fp, "%s", val->as.string);
 }
 
 int main(/*int argc, char* argv[]*/) {

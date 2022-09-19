@@ -4,8 +4,6 @@
 #include "structs.h"
 
 size_t get_precedence(ASTNode* node);
-void dump_node(FILE* fp, ASTNode* ast);
-void dump_tree(FILE* fp, ASTNode* rootNode);
 ASTNode* make_astnode(Token* token);
 void free_astnode(ASTNode* node);
 void hang_left(ASTNode* parent, ASTNode* child);

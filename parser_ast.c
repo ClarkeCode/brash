@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -30,38 +29,6 @@ size_t get_precedence(ASTNode* node) {
 	if (node->token->type == OPERATOR_ASSIGNMENT)    { return 17; }
 	return 0;
 }
-
-void dump_node(FILE* fp, ASTNode* ast) {
-	//printf("Node: %p\n\t%p %p %p\n\n", ast, ast->parent, ast->left, ast->right);
-	if (!ast) fprintf(fp, "ERROR\n");
-	fprintf(fp, "\t\"%s:%d:%d\" ", ast->token->origin_file, ast->token->origin_line, ast->token->origin_char);
-	fprintf(fp, "[label=\"'%s'\\n%s\\n%s:%d:%d\"",
-				ast->token->content, getStr_token_t(ast->token->type),
-				ast->token->origin_file, ast->token->origin_line, ast->token->origin_char
-			);
-	fprintf(fp, "shape=\"%s\"]\n", true ? "ellipse" : "rectangle");
-
-	if (ast->left) {
-		fprintf(fp, "\t\"%s:%d:%d\"->\"%s:%d:%d\" [label=\"L\"]\n",
-					ast->token->origin_file, ast->token->origin_line, ast->token->origin_char,
-					ast->left->token->origin_file, ast->left->token->origin_line, ast->left->token->origin_char
-				);
-		dump_node(fp, ast->left);
-	}
-	if (ast->right) {
-		fprintf(fp, "\t\"%s:%d:%d\"->\"%s:%d:%d\" [label=\"R\"]\n",
-					ast->token->origin_file, ast->token->origin_line, ast->token->origin_char,
-					ast->right->token->origin_file, ast->right->token->origin_line, ast->right->token->origin_char
-				);
-		dump_node(fp, ast->right);
-	}
-}
-void dump_tree(FILE* fp, ASTNode* rootNode) {
-	fprintf(fp, "digraph G {\n");
-	dump_node(fp, rootNode);
-	fprintf(fp, "}\n");
-}
-
 
 void _init_value_from_token(Value* val, Token* token) {
 	switch (token->type) {
