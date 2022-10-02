@@ -12,39 +12,15 @@
 #include "variablelookup.h"
 
 #include "dumpfunctions.h"
-char* retrieveLine(FILE* stream) {
-	char* line = malloc(100 * sizeof(char));
-	size_t lsize = 0;
-	size_t lcapacity = 100;
-
-	if (line == NULL) return NULL; //Malloc failure
-
-	while (true) {
-		if (lsize == lcapacity) {
-			lcapacity *= 2;
-			char* nline = realloc(line, lcapacity);
-			if (nline == NULL) { //Realloc failure
-				free(line);
-				return NULL;
-			}
-		}
-
-		int c = fgetc(stream);
-		if (c == EOF) break;
-		if (c == '\n') break;
-		line[lsize++] = c;
-	}
-	line[lsize] = '\0';
-	return line;
-}
+#include "scline.h"
 
 int main(/*int argc, char* argv[]*/) {
 
 	Interpreter* terp = make_interpreter();
-	while (!lookup_has(terp->lookup, "quit")) {
-		fprintf(stdout, "brash> ");
-		char* line = retrieveLine(stdin);
+	CmdLine* cmdline = make_cmdline("brash> ", 16);
 
+	while (!lookup_has(terp->lookup, "quit")) {
+		char* line = grabInputLine(cmdline);
 
 		Lexer* lex = make_lexer(line, "notfile", 0);
 
@@ -64,7 +40,7 @@ int main(/*int argc, char* argv[]*/) {
 		{
 			FILE* fp = fopen("ast.out", "wb");
 			fprintf(fp, "\n=== PARSER ===\n");
-			dump_tree(fp, ast);
+			if (ast) dump_tree(fp, ast);
 			fclose(fp);
 
 			//fprintf(stdout, "\n=== PARSER ===\n");
@@ -75,6 +51,7 @@ int main(/*int argc, char* argv[]*/) {
 
 		interpret(terp, ast, NULL);
 
+		printf("\n");
 		while (terp->_top_index != 0) {
 			Value val = pop(terp, NULL);
 			dump_value_notype(stdout, &val);
@@ -94,6 +71,7 @@ int main(/*int argc, char* argv[]*/) {
 	fprintf(stdout, "Interpreter final state:\n");
 	dump_interpreter(stdout, terp);
 
+	free_cmdline(cmdline);
 	free_interpreter(terp);
 	return 0;
 }
