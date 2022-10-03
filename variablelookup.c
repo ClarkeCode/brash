@@ -76,13 +76,25 @@ void lookup_add(VariableLookup* lookup, char* name, Value val) {
 		}
 	}
 
-	lookup->_names[lookup->_internal_size] = intern_string(lookup, name);
-	Value* nval = lookup->_values + lookup->_internal_size;
-	*nval = val; //Copy value
-	if (nval->type == TYPE_STRING) {
-		nval->as.string = intern_string(lookup, val.as.string);
+	if (lookup_has(lookup, name)) {
+		size_t index = 0;
+		for (; index < lookup->_internal_size; index++) {
+			if (strcmp(lookup->_names[index], name) == 0) break;
+		}
+		lookup->_values[index] = val;
+		if (lookup->_values[index].type == TYPE_STRING) {
+			lookup->_values[index].as.string = intern_string(lookup, lookup->_values[index].as.string);
+		}
 	}
-	lookup->_internal_size++;
+	else {
+		lookup->_names[lookup->_internal_size] = intern_string(lookup, name);
+		Value* nval = lookup->_values + lookup->_internal_size;
+		*nval = val; //Copy value
+		if (nval->type == TYPE_STRING) {
+			nval->as.string = intern_string(lookup, val.as.string);
+		}
+		lookup->_internal_size++;
+	}
 }
 
 Value lookup_get(VariableLookup* lookup, char* lookupkey) {
