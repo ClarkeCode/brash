@@ -12,5 +12,5 @@ echo "//Generated-file"
 echo "#ifndef $HEADER_GUARD_LABEL"
 echo "#define $HEADER_GUARD_LABEL"
 grep -E "^#include" "$SOURCE_FILE" | grep -Ev "$GENERATED_FILE"
-grep -E "(.* {)" "$SOURCE_FILE" | grep -Ev "if|else|while|for|switch" | sed 's/ {/;/'
+grep -E "(.* {)" "$SOURCE_FILE" | grep -Ev "if|else|while|for|switch|struct" | sed 's/ {/;/'
 echo "#endif"
