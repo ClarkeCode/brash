@@ -76,6 +76,7 @@ token_t produceNextToken(StrView* content, Location* loc) {
 		lexer.location.line++;
 		lexer.location.offset = 0;
 		lexer.current += 1;
+		SET_CONTENT("");
 		return TOKEN_NEWLINE;
 	}
 	if (currentChar() == '"') { //TODO: handle escaped " characters
@@ -110,7 +111,7 @@ token_t produceNextToken(StrView* content, Location* loc) {
 			lexer.current++;
 		}
 		lexer.current++;
-		nSetView(content, lexer.start, lexer.current-lexer.start);
+		nSetView(content, lexer.start, lexer.current-lexer.start-1);
 		lexer.location.offset += (lexer.current-lexer.start);
 		return NUMBER;
 	}
