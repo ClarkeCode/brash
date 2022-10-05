@@ -106,17 +106,6 @@ token_t produceNextToken(StrView* content, Location* loc) {
 		lexer.location.offset += (lexer.current-lexer.start);
 		return NUMBER;
 	}
-	if (char_in(currentChar(), VALID_IDENTIFIER_CHAR)) {
-		while (currentChar() != '\0' && char_in(currentChar(), VALID_IDENTIFIER_CHAR)) {
-			lexer.current++;
-		}
-		lexer.current++;
-		nSetView(content, lexer.start, lexer.current-lexer.start-1);
-		lexer.location.offset += (lexer.current-lexer.start);
-		return NUMBER;
-	}
-
-
 
 	//Fixed length
 	RET_IF_MATCH("+", OPERATOR_ADD)
@@ -145,6 +134,16 @@ token_t produceNextToken(StrView* content, Location* loc) {
 	RET_IF_MATCH(">=", OPERATOR_GREATER_EQUAL)
 	RET_IF_MATCH("<", OPERATOR_LESSER)
 	RET_IF_MATCH(">", OPERATOR_GREATER)
+
+	if (char_in(currentChar(), VALID_IDENTIFIER_CHAR)) {
+		while (currentChar() != '\0' && char_in(currentChar(), VALID_IDENTIFIER_CHAR)) {
+			lexer.current++;
+		}
+		lexer.current++;
+		nSetView(content, lexer.start, lexer.current-lexer.start-1);
+		lexer.location.offset += (lexer.current-lexer.start);
+		return IDENTIFIER;
+	}
 
 	LEXER_ERROR_MSG("Unexpected character.");
 	return TOKEN_ERROR;
