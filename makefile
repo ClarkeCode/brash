@@ -24,7 +24,7 @@ build: $(SRCS)
 
 generated:
 	#./header_generator.sh lexer.c BRASH_LEXER > lexer.h
-	./generate_enumeration_lookups.sh enumerations.h > enum_lookups.c
+	./gen_enum_lookups.sh *.h > enum_lookups.c
 	./header_generator.sh enum_lookups.c ENUM_LOOKUPS > enum_lookups.h
 
 $(FINAL_TARGET): $(OBJS)

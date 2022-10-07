@@ -8,7 +8,7 @@ HEADER_GUARD_LABEL="$2"
 [[ -z "$SOURCE_FILE" ]] && echo "$0 ERROR: Must specify target .c file" && exit
 [[ -z "$HEADER_GUARD_LABEL" ]] && echo "$0 ERROR: Must specify header guard label" && exit
 
-echo "//Generated-file"
+echo "//Generated file"
 echo "#ifndef $HEADER_GUARD_LABEL"
 echo "#define $HEADER_GUARD_LABEL"
 grep -E "^#include" "$SOURCE_FILE" | grep -Ev "$GENERATED_FILE"
