@@ -5,6 +5,13 @@
 typedef uint8_t byte_t;
 typedef enum {
 	OP_RETURN,
+	OP_CONSTANT,
+	OP_NEGATE,
+	OP_ADD,
+	OP_SUBTRACT,
+	OP_MULTIPLY,
+	OP_DIVIDE,
+	OP_MODULO,
 } OpCode;
 
 typedef struct {
