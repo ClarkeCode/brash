@@ -23,7 +23,6 @@ build: $(SRCS)
 	@$(MAKE) $(FINAL_TARGET)
 
 generated:
-	#./header_generator.sh lexer.c BRASH_LEXER > lexer.h
 	./gen_enum_lookups.sh *.h > enum_lookups.c
 	./header_generator.sh enum_lookups.c ENUM_LOOKUPS > enum_lookups.h
 
