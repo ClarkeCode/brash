@@ -13,7 +13,7 @@ function makeSwitch {
 	for val in $enum_vals; do
 		printf "\t\tcase %-30s: return \"%s\";\n" "$val" "$val"
 	done
-	printf "\t\tdefault: return \"LOOKUP_UNKNOWN_VALUE\"\n";
+	printf "\t\tdefault: return \"LOOKUP_UNKNOWN_VALUE\";\n";
 	printf "\t}\n}\n"
 }
 
