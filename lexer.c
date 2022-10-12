@@ -68,7 +68,7 @@ token_t produceNextToken(StrView* content, Location* loc) {
 
 	if (atEnd()) {
 		SET_CONTENT("");
-		return TOKEN_EOF;
+		return TK_EOF;
 	}
 
 	//Variable length
@@ -77,19 +77,19 @@ token_t produceNextToken(StrView* content, Location* loc) {
 		lexer.location.offset = 0;
 		lexer.current += 1;
 		SET_CONTENT("");
-		return TOKEN_NEWLINE;
+		return TK_NEWLINE;
 	}
 	if (currentChar() == '"') { //TODO: handle escaped " characters
 		lexer.start++;
 		char* location_found = strchr(lexer.start, '"');
 		if (!location_found) {
 			LEXER_ERROR_MSG("Missing a closing '\"' to properly terminate string.");
-			return TOKEN_ERROR;
+			return TK_ERROR;
 		}
 		lexer.current = location_found+1;
 		nSetView(content, lexer.start, lexer.current-lexer.start-1);
 		lexer.location.offset += (lexer.current-lexer.start)+1;
-		return STRING;
+		return TK_STRING;
 	}
 	if (char_in(currentChar(), VALID_NUMERIC_CHAR)) {
 		bool has_floating_point = false;
@@ -97,43 +97,43 @@ token_t produceNextToken(StrView* content, Location* loc) {
 			if (has_floating_point && currentChar() == '.') {
 				LEXER_ERROR_MSG("Valid numbers cannot have multiple decimal places.");
 				lexer.current++;
-				return TOKEN_ERROR;
+				return TK_ERROR;
 			}
 			if (!has_floating_point && currentChar() == '.') { has_floating_point = true; }
 			lexer.current++;
 		}
 		nSetView(content, lexer.start, lexer.current-lexer.start);
 		lexer.location.offset += (lexer.current-lexer.start);
-		return NUMBER;
+		return TK_NUMBER;
 	}
 
 	//Fixed length
-	RET_IF_MATCH("+", OPERATOR_ADD)
-	RET_IF_MATCH("-", OPERATOR_SUB)
-	RET_IF_MATCH("*", OPERATOR_MULTIPLY)
-	RET_IF_MATCH("/", OPERATOR_DIVIDE)
-	RET_IF_MATCH("%", OPERATOR_MODULO)
+	RET_IF_MATCH("+", TK_ADD)
+	RET_IF_MATCH("-", TK_SUB)
+	RET_IF_MATCH("*", TK_MULTIPLY)
+	RET_IF_MATCH("/", TK_DIVIDE)
+	RET_IF_MATCH("%", TK_MODULO)
 
-	RET_IF_MATCH("(", PAREN_OPEN)
-	RET_IF_MATCH(")", PAREN_CLOSE)
-	RET_IF_MATCH("{", BRACE_OPEN)
-	RET_IF_MATCH("}", BRACE_CLOSE)
+	RET_IF_MATCH("(", TK_PARENOPEN)
+	RET_IF_MATCH(")", TK_PARENCLOSE)
+	RET_IF_MATCH("{", TK_BRACEOPEN)
+	RET_IF_MATCH("}", TK_BRACECLOSE)
 
-	RET_IF_MATCH("&&", LOGICAL_AND)
-	RET_IF_MATCH("||", LOGICAL_OR)
-	RET_IF_MATCH("^^", LOGICAL_XOR)
-	RET_IF_MATCH("true", BOOLEAN)
-	RET_IF_MATCH("false", BOOLEAN)
+	RET_IF_MATCH("&&", TK_AND)
+	RET_IF_MATCH("||", TK_OR)
+	RET_IF_MATCH("^^", TK_XOR)
+	RET_IF_MATCH("true", TK_BOOLEAN)
+	RET_IF_MATCH("false", TK_BOOLEAN)
 
 	//Operators or keywords with potential overlaps
-	RET_IF_MATCH("==", OPERATOR_EQUALITY)
-	RET_IF_MATCH("!=", OPERATOR_INEQUALITY)
-	RET_IF_MATCH("!", LOGICAL_NOT)
-	RET_IF_MATCH("=", OPERATOR_ASSIGNMENT)
-	RET_IF_MATCH("<=", OPERATOR_LESSER_EQUAL)
-	RET_IF_MATCH(">=", OPERATOR_GREATER_EQUAL)
-	RET_IF_MATCH("<", OPERATOR_LESSER)
-	RET_IF_MATCH(">", OPERATOR_GREATER)
+	RET_IF_MATCH("==", TK_EQUALITY)
+	RET_IF_MATCH("!=", TK_INEQUALITY)
+	RET_IF_MATCH("!", TK_NOT)
+	RET_IF_MATCH("=", TK_ASSIGNMENT)
+	RET_IF_MATCH("<=", TK_LESSER_EQUAL)
+	RET_IF_MATCH(">=", TK_GREATER_EQUAL)
+	RET_IF_MATCH("<", TK_LESSER)
+	RET_IF_MATCH(">", TK_GREATER)
 
 	if (char_in(currentChar(), VALID_IDENTIFIER_CHAR)) {
 		while (currentChar() != '\0' && char_in(currentChar(), VALID_IDENTIFIER_CHAR)) {
@@ -142,11 +142,11 @@ token_t produceNextToken(StrView* content, Location* loc) {
 		lexer.current++;
 		nSetView(content, lexer.start, lexer.current-lexer.start-1);
 		lexer.location.offset += (lexer.current-lexer.start);
-		return IDENTIFIER;
+		return TK_IDENTIFIER;
 	}
 
 	LEXER_ERROR_MSG("Unexpected character.");
-	return TOKEN_ERROR;
+	return TK_ERROR;
 }
 #undef SET_CONTENT
 #undef LEXER_ERROR_MSG

@@ -40,7 +40,7 @@ void errorAtPrevious(const char* message) { errorAt(&parser.previous, message); 
 void advanceParser() {
 	parser.previous = parser.current;
 	parser.current.type = produceNextToken(&parser.current.content, &parser.current.location);
-	if (parser.current.type == TOKEN_ERROR)
+	if (parser.current.type == TK_ERROR)
 		errorAtCurrent(NULL);
 }
 void consumeIf(token_t type, const char* failureMessage) {
@@ -66,7 +66,7 @@ bool compile(const char* source, Chunk* chunk) {
 	parser.panicMode = false;
 	advanceParser();
 	//expression
-	consumeIf(TOKEN_EOF, "Expected end of expression.");
+	consumeIf(TK_EOF, "Expected end of expression.");
 	endCompiler();
 	return true;
 }

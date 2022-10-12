@@ -21,7 +21,7 @@ int main(/*int argc, char* argv[]*/) {
 		printf("%s '%s' %s:%d:%d\n", getStr_token_t(tok), content_str, location.file ? location.file : "N/A", location.line, location.offset);
 		free(content_str);
 	}
-	while (tok != TOKEN_EOF);
+	while (tok != TK_EOF);
 
 	return 0;
 }
