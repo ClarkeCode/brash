@@ -2,8 +2,7 @@
 #define BRASH_COMPILER
 #include <stdbool.h>
 
-#include "enumerations.h"
-#include "lexer.h" //StrView + Location
+#include "lexer.h" //StrView + Location + token_t
 #include "chunk.h"
 
 typedef struct {

@@ -3,7 +3,6 @@
 #include <stdbool.h> //bool
 #include <string.h>
 
-#include "enumerations.h"
 #include "enum_lookups.h"
 #include "lexer.h"
 #include "scline.h"
