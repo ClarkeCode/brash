@@ -51,6 +51,12 @@ typedef struct {
 	size_t offset;
 } Location;
 
+typedef struct {
+	token_t type;
+	StrView content;
+	Location location;
+} Token;
+
 void setLexer(char* filename, char* program);
-token_t produceNextToken(StrView* content, Location* loc);
+Token produceNextToken();
 #endif

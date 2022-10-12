@@ -1,15 +1,8 @@
 #ifndef BRASH_COMPILER
 #define BRASH_COMPILER
 #include <stdbool.h>
-
-#include "lexer.h" //StrView + Location + token_t
+#include "lexer.h" //Token
 #include "chunk.h"
-
-typedef struct {
-	token_t type;
-	StrView content;
-	Location location;
-} Token;
 
 typedef struct {
 	Token current;

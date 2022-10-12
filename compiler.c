@@ -39,7 +39,7 @@ void errorAtPrevious(const char* message) { errorAt(&parser.previous, message); 
 
 void advanceParser() {
 	parser.previous = parser.current;
-	parser.current.type = produceNextToken(&parser.current.content, &parser.current.location);
+	parser.current = produceNextToken();
 	if (parser.current.type == TK_ERROR)
 		errorAtCurrent(NULL);
 }

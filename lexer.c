@@ -61,7 +61,7 @@ void advance_whitespace(char** sourcePtr) {
 
 char* VALID_NUMERIC_CHAR = "0123456789.";
 char* VALID_IDENTIFIER_CHAR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
-token_t produceNextToken(StrView* content, Location* loc) {
+token_t _produceNextToken(StrView* content, Location* loc) {
 	advance_whitespace(&lexer.current);
 	lexer.start = lexer.current;
 	*loc = lexer.location; //Copy by-value
@@ -155,3 +155,8 @@ token_t produceNextToken(StrView* content, Location* loc) {
 #undef RET_IF_MATCH
 
 
+Token produceNextToken() {
+	Token nextToken = {0};
+	nextToken.type = _produceNextToken(&nextToken.content, &nextToken.location);
+	return nextToken;
+}
