@@ -164,7 +164,7 @@ void expression(bool canAssign) {
 }
 void grouping(bool canAssign) {
 	expression(canAssign);
-	consumeIf(TK_PAREN_OPEN, "Expected a closing ')' after expression");
+	consumeIf(TK_PAREN_CLOSE, "Expected a closing ')' after expression");
 }
 void unary(bool canAssign) {
 	token_t operatorType = parser.previous.type;
@@ -180,14 +180,14 @@ void unary(bool canAssign) {
 
 
 ParseRule rules[] = {
-	[TK_ERROR]         = {grouping, NULL,   PREC_NONE},
+	[TK_ERROR]         = {NULL,     NULL,   PREC_NONE},
 	[TK_EOF]           = {NULL,     NULL,   PREC_NONE},
 	[TK_NEWLINE]       = {NULL,     NULL,   PREC_NONE},
 	[TK_STRING]        = {NULL,     NULL,   PREC_NONE},
 	[TK_NUMBER]        = {number,   NULL,   PREC_NONE},
 	[TK_BOOLEAN]       = {NULL,     NULL,   PREC_NONE},
 	[TK_IDENTIFIER]    = {NULL,     NULL,   PREC_NONE},
-	[TK_PAREN_OPEN]    = {NULL,     NULL,   PREC_NONE},
+	[TK_PAREN_OPEN]    = {grouping, NULL,   PREC_NONE},
 	[TK_PAREN_CLOSE]   = {NULL,     NULL,   PREC_NONE},
 	[TK_BRACE_OPEN]    = {NULL,     NULL,   PREC_NONE},
 	[TK_BRACE_CLOSE]   = {NULL,     NULL,   PREC_NONE},
