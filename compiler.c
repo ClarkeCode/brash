@@ -174,6 +174,9 @@ void unary(bool canAssign) {
 		case TK_SUB:
 			emitByte(OP_NEGATE);
 			break;
+		case TK_NOT:
+			emitByte(OP_NOT);
+			break;
 		default: return; //Unreachable
 	}
 }
@@ -197,13 +200,13 @@ ParseRule rules[] = {
 	[TK_DIVIDE]        = {NULL,     binary, PREC_FACTOR},
 	[TK_MODULO]        = {NULL,     binary, PREC_FACTOR},
 	[TK_ASSIGNMENT]    = {NULL,     NULL,   PREC_NONE},
-	[TK_EQUALITY]      = {NULL,     NULL,   PREC_EQUALITY},
-	[TK_INEQUALITY]    = {NULL,     NULL,   PREC_EQUALITY},
-	[TK_LESSER]        = {NULL,     NULL,   PREC_COMPARISON},
-	[TK_GREATER]       = {NULL,     NULL,   PREC_COMPARISON},
-	[TK_LESSER_EQUAL]  = {NULL,     NULL,   PREC_COMPARISON},
-	[TK_GREATER_EQUAL] = {NULL,     NULL,   PREC_COMPARISON},
-	[TK_NOT]           = {NULL,     NULL,   PREC_NONE},
+	[TK_EQUALITY]      = {NULL,     binary, PREC_EQUALITY},
+	[TK_INEQUALITY]    = {NULL,     binary, PREC_EQUALITY},
+	[TK_LESSER]        = {NULL,     binary, PREC_COMPARISON},
+	[TK_GREATER]       = {NULL,     binary, PREC_COMPARISON},
+	[TK_LESSER_EQUAL]  = {NULL,     binary, PREC_COMPARISON},
+	[TK_GREATER_EQUAL] = {NULL,     binary, PREC_COMPARISON},
+	[TK_NOT]           = {unary,    NULL,   PREC_NONE},
 	[TK_AND]           = {NULL,     NULL,   PREC_AND},
 	[TK_OR]            = {NULL,     NULL,   PREC_OR},
 	[TK_XOR]           = {NULL,     NULL,   PREC_XOR},
@@ -212,14 +215,19 @@ ParseRule* getRule(token_t type) { return &rules[type]; }
 
 void binary(bool canAssign) {
 	token_t operatorType = parser.previous.type;
-	ParseRule* rule = getRule(operatorType);
-	parsePrecedence((Precedence)(rule->precedence + 1));
 	switch (operatorType) {
-		case TK_ADD:      emitByte(OP_ADD); break;
-		case TK_SUB:      emitByte(OP_SUBTRACT); break;
-		case TK_MULTIPLY: emitByte(OP_MULTIPLY); break;
-		case TK_DIVIDE:   emitByte(OP_DIVIDE); break;
-		case TK_MODULO:   emitByte(OP_MODULO); break;
+		case TK_ADD:           emitByte(OP_ADD); break;
+		case TK_SUB:           emitByte(OP_SUBTRACT); break;
+		case TK_MULTIPLY:      emitByte(OP_MULTIPLY); break;
+		case TK_DIVIDE:        emitByte(OP_DIVIDE); break;
+		case TK_MODULO:        emitByte(OP_MODULO); break;
+
+		case TK_EQUALITY:      emitByte(OP_EQUALS); break;
+		case TK_INEQUALITY:    emitBytes(OP_EQUALS, OP_NOT); break;
+		case TK_LESSER:        emitByte(OP_LESSER); break;
+		case TK_GREATER:       emitByte(OP_GREATER); break;
+		case TK_LESSER_EQUAL:  emitBytes(OP_GREATER, OP_NOT); break;
+		case TK_GREATER_EQUAL: emitBytes(OP_LESSER, OP_NOT); break;
 		default: return; //Unreachable
 	}
 }

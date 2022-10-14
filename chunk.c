@@ -60,6 +60,10 @@ size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 		case OP_MULTIPLY: PRINT_SINGLE_BYTE(OP_MULTIPLY);
 		case OP_DIVIDE:   PRINT_SINGLE_BYTE(OP_DIVIDE);
 		case OP_MODULO:   PRINT_SINGLE_BYTE(OP_MODULO);
+		case OP_EQUALS:   PRINT_SINGLE_BYTE(OP_EQUALS);
+		case OP_GREATER:  PRINT_SINGLE_BYTE(OP_GREATER);
+		case OP_LESSER:   PRINT_SINGLE_BYTE(OP_LESSER);
+		case OP_NOT:      PRINT_SINGLE_BYTE(OP_NOT);
 
 		case OP_CONSTANT:
 			fprintf(outfile, "%-15s", getStr_OpCode(OP_CONSTANT));
