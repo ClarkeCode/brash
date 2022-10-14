@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 
 function makeSwitch {
-	local line="$1"
-	local enum_vals=$(echo "$1" | grep -Eo "\{.*\}" | sed 's/[\{\},]/ /g')
-	local enum_name=$(echo "$1" | grep -Eo "}.*;" | sed 's/[ ;\}]//g')
+	local line=$(echo "$1" | sed 's/=.*,/,/g')
+	local enum_vals=$(echo "$line" | grep -Eo "\{.*\}" | sed 's/[\{\},]/ /g')
+	local enum_name=$(echo "$line" | grep -Eo "}.*;" | sed 's/[ ;\}]//g')
 #	echo "$line"
 #	echo "$enum_vals"
 #	echo "$enum_name"
