@@ -8,5 +8,5 @@ fi
 echo "//Generated file"
 echo "digraph G {"
 printf "\t\"main.c\"[shape=diamond]\n"
-grep -o "#include \".*\"" "$@" | sed 's/\(.*\?\):.*\(".*"\)/\t\2->"\1"/' | sed 's/\(".*\.h"\)->/\1[shape=rectangle]\n\t\0/'
+grep -o "#include \".*\"" "$@" | sed 's/\(.*\?\):.*\(".*"\)/\t\2->"\1"/ ; s/\(".*\.h"\)->/\1 [shape=rectangle]\n\t\0/' | sort | uniq
 echo "}"
