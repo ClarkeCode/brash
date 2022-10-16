@@ -35,4 +35,7 @@ typedef struct {
 } ObjectString;
 
 bool valueEquality(Value v1, Value v2);
+
+#include <stdio.h>
+void printValue(FILE* outfile, Value value);
 #endif

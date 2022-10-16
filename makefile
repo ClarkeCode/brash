@@ -1,7 +1,7 @@
 # Used https://opensource.com/article/18/8/what-how-makefile as a reference
 
-CC = gcc -g -Wall -Wextra
-COMPILERFLAGS = -c
+CC = gcc -g -Wall -Wextra -Wno-unused-parameter
+COMPILERFLAGS = -c -D BRASH_ALLOW_DEBUG_OUTPUT
 LINKERFLAGS = -lm
 
 BUILDDIR := build

@@ -61,7 +61,7 @@ void consumeIf(token_t type, const char* failureMessage) {
 
 
 static void emitByte(byte_t byte) {
-  writeChunk(currentChunk(), byte, parser.previous.location);
+	writeChunk(currentChunk(), byte, parser.previous.location);
 }
 void emitBytes(byte_t b1, byte_t b2) {
 	emitByte(b1);
@@ -75,7 +75,7 @@ void emitConstant(Value value) {
 		fprintf(stderr, "Too many constants in a single chunk");
 		return;
 	}
-	emitBytes(OP_CONSTANT, (byte_t)index);
+	emitBytes(OP_NUMBER, (byte_t)index);
 }
 void endCompiler() { emitReturn(); }
 
@@ -215,6 +215,9 @@ ParseRule* getRule(token_t type) { return &rules[type]; }
 
 void binary(bool canAssign) {
 	token_t operatorType = parser.previous.type;
+	ParseRule* rule = getRule(operatorType);
+	parsePrecedence((Precedence)(rule->precedence + 1));
+
 	switch (operatorType) {
 		case TK_ADD:           emitByte(OP_ADD); break;
 		case TK_SUB:           emitByte(OP_SUBTRACT); break;

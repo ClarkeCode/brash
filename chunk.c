@@ -39,15 +39,8 @@ size_t recordConstant(Chunk* chunk, Value value) {
 	return chunk->c_size - 1;
 }
 
-//For compiler debug/output
-#define outfile stdout
 #include "enum_lookups.h"
-void printValue(Value value) {
-	if (value.type == VAL_NUMBER)
-		fprintf(outfile, "<%s : %f>", getStr_value_t(value.type), value.as.number);
-	if (value.type == VAL_BOOLEAN)
-		fprintf(outfile, "<%s : %s>", getStr_value_t(value.type), (value.as.boolean) ? "true" : "false");
-}
+#define outfile stdout
 #define PRINT_SINGLE_BYTE(op) fprintf(outfile, "%s\n", getStr_OpCode(op)); return offset + 1
 size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 	printf("%04d ", offset);
@@ -65,10 +58,10 @@ size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 		case OP_LESSER:   PRINT_SINGLE_BYTE(OP_LESSER);
 		case OP_NOT:      PRINT_SINGLE_BYTE(OP_NOT);
 
-		case OP_CONSTANT:
-			fprintf(outfile, "%-15s", getStr_OpCode(OP_CONSTANT));
+		case OP_NUMBER:
+			fprintf(outfile, "%-15s", getStr_OpCode(OP_NUMBER));
 			byte_t index = chunk->code[offset+1];
-			printValue(chunk->constants[index]);
+			printValue(outfile, chunk->constants[index]);
 			fprintf(outfile, "\n");
 			return offset + 2;
 

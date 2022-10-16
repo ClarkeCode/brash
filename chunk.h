@@ -7,13 +7,16 @@
 typedef uint8_t byte_t;
 typedef enum {
 	OP_RETURN,
-	OP_CONSTANT,
+	OP_NUMBER,
 	OP_NEGATE,
 	OP_ADD,
 	OP_SUBTRACT,
 	OP_MULTIPLY,
 	OP_DIVIDE,
 	OP_MODULO,
+
+	OP_TRUE,
+	OP_FALSE,
 	OP_EQUALS,
 	OP_GREATER,
 	OP_LESSER,

@@ -8,8 +8,12 @@
 #include "lexer.h"
 #include "compiler.h"
 
+#include "debugging.h"
+
 int main(/*int argc, char* argv[]*/) {
-	char* program = "1*3 + 2";
+	setDebugFlags(0);
+
+	char* program = "1 + 2";
 
 	Chunk chunk;
 	initChunk(&chunk);

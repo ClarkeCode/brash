@@ -155,8 +155,12 @@ token_t _produceNextToken(StrView* content, Location* loc) {
 #undef RET_IF_MATCH
 
 
+#include "debugging.h"
+#include "enum_lookups.h"
+
 Token produceNextToken() {
 	Token nextToken = {0};
 	nextToken.type = _produceNextToken(&nextToken.content, &nextToken.location);
+	printDebug(stdout, LEX_TOKEN_PRODUCTION, "[LEX] produceNextToken: %s\n", getStr_token_t(nextToken.type));
 	return nextToken;
 }

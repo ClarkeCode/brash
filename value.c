@@ -26,3 +26,11 @@ bool valueEquality(Value v1, Value v2) {
 	return false;
 }
 
+//For compiler debug/output
+#include "enum_lookups.h"
+void printValue(FILE* outfile, Value value) {
+	if (value.type == VAL_NUMBER)
+		fprintf(outfile, "<%s : %f>", getStr_value_t(value.type), value.as.number);
+	if (value.type == VAL_BOOLEAN)
+		fprintf(outfile, "<%s : %s>", getStr_value_t(value.type), (value.as.boolean) ? "true" : "false");
+}

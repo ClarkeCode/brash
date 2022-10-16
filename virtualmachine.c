@@ -25,7 +25,7 @@ InterpretResult run() {
 	while (true) {
 		byte_t instruction = READ_BYTE();
 		switch (instruction) {
-			case OP_CONSTANT:
+			case OP_NUMBER:
 //				Value constant = READ_CONSTANT();
 //				push(constant);
 //				printValue(constant);
