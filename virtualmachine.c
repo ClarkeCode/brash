@@ -5,6 +5,9 @@
 #include "value.h"
 #include "chunk.h"
 
+#include "debugging.h"
+#include "enum_lookups.h"
+
 VM vm;
 
 void resetStack() { vm.stackTop = vm.stack; }
@@ -21,16 +24,17 @@ Value pop(){
 
 InterpretResult run() {
 #define READ_BYTE() (*vm.ip++)
-#define READ_CONSTANT() (vm.chunk->constants.values[READ_BYTE()])
+#define READ_CONSTANT() (vm.chunk->constants[READ_BYTE()])
 	while (true) {
 		byte_t instruction = READ_BYTE();
+		printDebug(stdout, VM_READING_INSTRUCTIONS, "[VM] Reading instruction '%s'\n", getStr_OpCode(instruction));
 		switch (instruction) {
-			case OP_NUMBER:
-//				Value constant = READ_CONSTANT();
-//				push(constant);
-//				printValue(constant);
-//				printf("\n");
-				break;
+			case OP_NUMBER: {
+				Value constant = READ_CONSTANT();
+				printValue(stdout, constant);
+				printf("\n");
+				push(constant);
+				} break;
 
 			//Arithmetic instructions
 			case OP_NEGATE: {
@@ -65,7 +69,6 @@ InterpretResult run() {
 			case OP_MODULO: {
 				Value b = pop();
 				Value a = pop();
-				//TODO: handle floating point modulus
 				Value result = { VAL_NUMBER, {.number=fmod(a.as.number, b.as.number)} };
 				push(result);
 				} break;
@@ -104,6 +107,7 @@ InterpretResult interpret(const char* source) {
 	
 	vm.chunk = &chunk;
 	vm.ip = vm.chunk->code;
+	disassembleChunk(&chunk, "test chunk");
 
 	InterpretResult result = run();
 	freeChunk(&chunk);
