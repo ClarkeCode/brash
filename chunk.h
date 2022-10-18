@@ -4,7 +4,8 @@
 #include <stdint.h>
 #include "value.h"
 #include "lexer.h" //Location
-typedef uint8_t byte_t;
+#include "bytes.h"
+
 typedef enum {
 	OP_RETURN,
 	OP_NUMBER,
@@ -34,6 +35,6 @@ typedef struct {
 void initChunk(Chunk* chunk);
 void writeChunk(Chunk* chunk, byte_t byte, Location location);
 void freeChunk(Chunk* chunk);
-size_t recordConstant(Chunk* chunk, Value value);
+
 void disassembleChunk(Chunk* chunk, const char* name);
 #endif

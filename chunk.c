@@ -29,15 +29,6 @@ void freeChunk(Chunk* chunk) {
 	FREE_ARRAY(Value, chunk->constants, chunk->c_cap);
 	initChunk(chunk);
 }
-size_t recordConstant(Chunk* chunk, Value value) {
-	if (chunk->c_size >= chunk->c_cap) {
-		size_t oldCapacity = chunk->c_cap;
-		chunk->c_cap = GROW_CAPACITY(oldCapacity);
-		chunk->constants = GROW_ARRAY(Value, chunk->constants, oldCapacity, chunk->c_cap);
-	}
-	chunk->constants[chunk->c_size++] = value;
-	return chunk->c_size - 1;
-}
 
 #include "enum_lookups.h"
 #define outfile stdout
@@ -60,10 +51,9 @@ size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 
 		case OP_NUMBER:
 			fprintf(outfile, "%-15s", getStr_OpCode(OP_NUMBER));
-			byte_t index = chunk->code[offset+1];
-			printValue(outfile, chunk->constants[index]);
+			fprintf(outfile, "%f", readDoubleFromBytes(chunk->code + (offset+1)));
 			fprintf(outfile, "\n");
-			return offset + 2;
+			return offset + 1 + 8;
 
 		default:
 			fprintf(outfile, "Unknown opcode %d\n", instruction);

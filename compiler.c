@@ -69,13 +69,13 @@ void emitBytes(byte_t b1, byte_t b2) {
 }
 void emitReturn() { emitByte(OP_RETURN); }
 void emitConstant(Value value) {
-	//consumed makeConstant
-	size_t index = recordConstant(currentChunk(), value);
-	if (index > UINT8_MAX) {
-		fprintf(stderr, "Too many constants in a single chunk");
-		return;
+	emitByte(OP_NUMBER);
+
+	double bundledNumber = 0;
+	transpose8Bytes(&value.as.number, &bundledNumber);
+	for (size_t x = 0; x < 8; x++) {
+		emitByte(((byte_t*)&bundledNumber)[x]);
 	}
-	emitBytes(OP_NUMBER, (byte_t)index);
 }
 void endCompiler() { emitReturn(); }
 
