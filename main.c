@@ -11,9 +11,9 @@
 #include "debugging.h"
 
 int main(/*int argc, char* argv[]*/) {
-	setDebugFlags(VM_READING_INSTRUCTIONS);
+	setDebugFlags(VM_READING_INSTRUCTIONS | VM_STACK_TRACE);
 
-	char* program = "1 + 2";
+	char* program = "(1 + 2)*3/1.4";
 
 //	Chunk chunk;
 //	initChunk(&chunk);

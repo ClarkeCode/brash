@@ -109,6 +109,12 @@ InterpretResult interpret(const char* source) {
 	disassembleChunk(&chunk, "test chunk");
 
 	InterpretResult result = run();
+	if (hasDebugFlag(VM_STACK_TRACE) && vm.stackTop != vm.stack) {
+		printDebug(stdout, VM_STACK_TRACE, "[VM] Finished with %d items on the value stack:\n", vm.stackTop - vm.stack);
+		while (vm.stackTop-- != vm.stack) {
+			printDebug(stdout, VM_STACK_TRACE, "\t<%s : %f>\n", getStr_value_t(vm.stackTop->type), vm.stackTop->as.number);
+		}
+	}
 	freeChunk(&chunk);
 	return result;
 }

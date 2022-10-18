@@ -16,5 +16,15 @@ void printDebug(FILE* fp, Flags whenToPrint, const char* format, ...) {
 }
 
 void setDebugFlags(Flags flags) {
+#ifdef BRASH_ALLOW_DEBUG_OUTPUT
 	dbflags = flags;
+#endif
+}
+
+int hasDebugFlag(Flags flag) {
+#ifdef BRASH_ALLOW_DEBUG_OUTPUT
+	return dbflags & flag;
+#else
+	return 0;
+#endif
 }
