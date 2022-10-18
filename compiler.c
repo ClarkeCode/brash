@@ -4,7 +4,6 @@
 
 #include "compiler.h"
 #include "enum_lookups.h"
-#include "lexer.h" //Token
 
 typedef struct {
 	Token current;

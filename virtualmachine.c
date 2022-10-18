@@ -2,9 +2,6 @@
 #include <math.h> //fmod
 #include "virtualmachine.h"
 #include "compiler.h"
-#include "value.h"
-#include "chunk.h"
-
 #include "debugging.h"
 #include "enum_lookups.h"
 

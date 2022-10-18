@@ -1,7 +1,6 @@
 #ifndef BRASH_VM
 #define BRASH_VM
 #include "chunk.h"
-#include "value.h"
 
 #define STACK_MAX 512
 typedef struct {
