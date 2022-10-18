@@ -15,14 +15,14 @@ int main(/*int argc, char* argv[]*/) {
 
 	char* program = "1 + 2";
 
-	Chunk chunk;
-	initChunk(&chunk);
-	bool success = compile(program, &chunk);
-	printf((success ? "Compilation successful\n" : "Compilation failure\n"));
-	disassembleChunk(&chunk, "test chunk");
-	freeChunk(&chunk);
+//	Chunk chunk;
+//	initChunk(&chunk);
+//	bool success = compile(program, &chunk);
+//	printf((success ? "Compilation successful\n" : "Compilation failure\n"));
+//	disassembleChunk(&chunk, "test chunk");
+//	freeChunk(&chunk);
 
-	//InterpretResult result = interpret(program);
-	//printf("%s\n", getStr_InterpretResult(result));
+	InterpretResult result = interpret(program);
+	printf("%s\n", getStr_InterpretResult(result));
 	return 0;
 }

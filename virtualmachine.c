@@ -21,15 +21,15 @@ Value pop(){
 
 InterpretResult run() {
 #define READ_BYTE() (*vm.ip++)
-#define READ_CONSTANT() (vm.chunk->constants[READ_BYTE()])
 	while (true) {
 		byte_t instruction = READ_BYTE();
-		printDebug(stdout, VM_READING_INSTRUCTIONS, "[VM] Reading instruction '%s'\n", getStr_OpCode(instruction));
+		printDebug(stdout, VM_READING_INSTRUCTIONS, "[VM] Reading instruction '%s'", getStr_OpCode(instruction));
 		switch (instruction) {
 			case OP_NUMBER: {
-				Value constant = READ_CONSTANT();
-				printValue(stdout, constant);
-				printf("\n");
+				Value constant = { VAL_NUMBER, {.number=(readDoubleFromBytes(vm.ip))} };
+				vm.ip += 8;
+
+				printDebug(stdout, VM_READING_INSTRUCTIONS, " <%s : %f>", getStr_value_t(constant.type), constant.as.number);
 				push(constant);
 				} break;
 
@@ -71,15 +71,16 @@ InterpretResult run() {
 				} break;
 
 			case OP_RETURN: {
+				printDebug(stdout, VM_READING_INSTRUCTIONS, "\n");
 				return INTERPRET_OK;
 				} break;
 		}
+		printDebug(stdout, VM_READING_INSTRUCTIONS, "\n");
 	}
 	//TODO: implement
 	return INTERPRET_OK;
 
 #undef READ_BYTE
-#undef READ_CONSTANT
 }
 
 bool typecheck(Chunk* chunk) {
@@ -102,6 +103,7 @@ InterpretResult interpret(const char* source) {
 		return INTERPRET_TYPECHECK_ERROR;
 	}
 	
+	initVM();
 	vm.chunk = &chunk;
 	vm.ip = vm.chunk->code;
 	disassembleChunk(&chunk, "test chunk");
