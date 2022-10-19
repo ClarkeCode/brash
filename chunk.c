@@ -7,10 +7,6 @@ void initChunk(Chunk* chunk) {
 	chunk->op_locations = NULL;
 	chunk->size = 0;
 	chunk->capacity = 0;
-
-	chunk->constants = NULL;
-	chunk->c_size = 0;
-	chunk->c_cap = 0;
 }
 void writeChunk(Chunk* chunk, byte_t byte, Location location) {
 	if (chunk->size >= chunk->capacity) {
@@ -26,10 +22,11 @@ void writeChunk(Chunk* chunk, byte_t byte, Location location) {
 }
 void freeChunk(Chunk* chunk) {
 	FREE_ARRAY(byte_t, chunk->code, chunk->capacity);
-	FREE_ARRAY(Value, chunk->constants, chunk->c_cap);
+	FREE_ARRAY(byte_t, chunk->op_locations, chunk->capacity);
 	initChunk(chunk);
 }
 
+#include <string.h>
 #include "enum_lookups.h"
 #define outfile stdout
 #define PRINT_SINGLE_BYTE(op) fprintf(outfile, "%s\n", getStr_OpCode(op)); return offset + 1
@@ -60,6 +57,15 @@ size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 			fprintf(outfile, "%f", readDoubleFromBytes(chunk->code + (offset+1)));
 			fprintf(outfile, "\n");
 			return offset + 1 + 8;
+		case OP_STRING:// {
+			fprintf(outfile, "%-15s", getStr_OpCode(instruction));
+			size_t length = strlen((char*)(chunk->code + offset + 1));
+			char* strcontent = malloc(sizeof(byte_t) * (length+1));
+			strcpy(strcontent, (char*)(chunk->code + offset + 1));
+			fprintf(outfile, " '%s'\n", strcontent);
+			free(strcontent);
+			return offset + 1 + length + 1;
+			//} break;
 
 		default:
 			fprintf(outfile, "Unknown opcode %d\n", instruction);

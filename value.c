@@ -26,6 +26,29 @@ bool valueEquality(Value v1, Value v2) {
 	return false;
 }
 
+#include <stdlib.h>
+ObjectString* makeString(char* bytes) {
+	ObjectString* ostring = calloc(sizeof(ObjectString), 1);
+	ostring->obj.type = OBJ_STRING;
+	ostring->obj.next = NULL;
+	ostring->len = strlen(bytes);
+	ostring->cstr = calloc(sizeof(char), ostring->len + 1);
+	memcpy(ostring->cstr, bytes, ostring->len + 1);
+	return ostring;
+}
+void freeString(ObjectString* ostring) {
+	if (ostring->cstr) free(ostring->cstr);
+	if (ostring) free(ostring);
+}
+void freeObject(Object* obj) {
+	switch (obj->type) {
+		case OBJ_STRING:
+			freeString((ObjectString*) obj);
+			break;
+		default: break;
+	}
+}
+
 //For compiler debug/output
 #include "enum_lookups.h"
 void printValue(FILE* outfile, Value value) {

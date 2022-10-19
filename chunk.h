@@ -9,6 +9,7 @@
 typedef enum {
 	OP_RETURN,
 	OP_NUMBER,
+	OP_STRING,
 	OP_NEGATE,
 	OP_ADD,
 	OP_SUBTRACT,
@@ -32,9 +33,6 @@ typedef struct {
 	Location* op_locations;
 	byte_t* code;
 	size_t size, capacity;
-
-	Value* constants;
-	size_t c_size, c_cap;
 } Chunk;
 void initChunk(Chunk* chunk);
 void writeChunk(Chunk* chunk, byte_t byte, Location location);

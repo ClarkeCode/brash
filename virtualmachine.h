@@ -9,6 +9,8 @@ typedef struct {
 	Value stack[STACK_MAX];
 	Value* stackTop;
 
+	Object* objects;
+	Object* mostRecentObject;
 	size_t allocatedBytes;
 } VM;
 #undef STACK_MAX

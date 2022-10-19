@@ -8,7 +8,26 @@
 VM vm;
 
 void resetStack() { vm.stackTop = vm.stack; }
-void initVM() { resetStack(); }
+void initVM() { vm.objects = NULL; vm.mostRecentObject = NULL; resetStack(); }
+
+void addObject(Object* object) {
+	if (vm.objects == NULL) {
+		vm.objects = object;
+	}
+	else {
+		vm.mostRecentObject->next = object;
+	}
+	vm.mostRecentObject = object;
+}
+
+void freeObjects() {
+	Object* object = vm.objects;
+	while (object != NULL) {
+		Object* next = object->next;
+		freeObject(object);
+		object = next;
+	}
+}
 
 void push(Value value){
 	*vm.stackTop = value;
@@ -19,6 +38,8 @@ Value pop(){
 	return *vm.stackTop;
 }
 
+#include <stdlib.h>
+#include <string.h>
 InterpretResult run() {
 #define READ_BYTE() (*vm.ip++)
 	while (true) {
@@ -40,6 +61,15 @@ InterpretResult run() {
 					Value val = { VAL_BOOLEAN, {.boolean=(false)} };
 					push(val);
 				} break;
+			case OP_STRING: {
+					//TODO:
+					ObjectString* ostring = makeString((char*)vm.ip);
+					addObject((Object*) ostring);
+					Value valstring = { VAL_OBJECT, {.object=((Object*)ostring)} };
+					printDebug(stdout, VM_READING_INSTRUCTIONS, " <%s : %s>", getStr_obj_t(valstring.as.object->type), ostring->cstr);
+					vm.ip += ostring->len + 1;
+					push(valstring);
+				} break;
 
 			//Arithmetic instructions
 			case OP_NEGATE: {
@@ -50,8 +80,24 @@ InterpretResult run() {
 			case OP_ADD: {
 					Value b = pop();
 					Value a = pop();
-					Value result = { VAL_NUMBER, {.number=(a.as.number + b.as.number)} };
-					push(result);
+
+					if (a.type == VAL_NUMBER && b.type == VAL_NUMBER) {
+						Value result = { VAL_NUMBER, {.number=(a.as.number + b.as.number)} };
+						push(result);
+					}
+					else if (a.type == VAL_OBJECT && a.as.object->type == OBJ_STRING &&
+							b.type == VAL_OBJECT && b.as.object->type == OBJ_STRING) {
+						ObjectString* ap = (ObjectString*)a.as.object;
+						ObjectString* bp = (ObjectString*)b.as.object;
+						char* concatenatedStr = calloc(sizeof(char), ap->len + bp->len + 1);
+						strcpy(concatenatedStr, ap->cstr);
+						strcpy(concatenatedStr + ap->len, bp->cstr);
+						ObjectString* ostring = makeString(concatenatedStr);
+						if (concatenatedStr) free(concatenatedStr);
+						addObject((Object*) ostring);
+						Value valstring = { VAL_OBJECT, {.object=((Object*)ostring)} };
+						push(valstring);
+					}
 				} break;
 			case OP_SUBTRACT: {
 					Value b = pop();
@@ -167,10 +213,16 @@ InterpretResult interpret(const char* source) {
 		while (vm.stackTop-- != vm.stack) {
 			if (vm.stackTop->type == VAL_NUMBER)
 				printDebug(stdout, VM_STACK_TRACE, "\t<%s : %f>\n", getStr_value_t(vm.stackTop->type), vm.stackTop->as.number);
-			else
+			else if (vm.stackTop->type == VAL_BOOLEAN)
 				printDebug(stdout, VM_STACK_TRACE, "\t<%s : %s>\n", getStr_value_t(vm.stackTop->type), (vm.stackTop->as.boolean ? "true" : "false"));
+			else if (vm.stackTop->type == VAL_OBJECT) {
+				printDebug(stdout, VM_STACK_TRACE, "\t[%s : '%s']\n", getStr_obj_t(vm.stackTop->as.object->type), ((ObjectString*)vm.stackTop->as.object)->cstr);
+			}
+			else
+				printDebug(stdout, VM_STACK_TRACE, "\tUnprintable value\n");
 		}
 	}
+	freeObjects();
 	freeChunk(&chunk);
 	return result;
 }

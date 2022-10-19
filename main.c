@@ -13,7 +13,7 @@
 int main(/*int argc, char* argv[]*/) {
 	setDebugFlags(LEX_TOKEN_PRODUCTION | COM_BYTE_EMISSION | VM_READING_INSTRUCTIONS | VM_STACK_TRACE);
 
-	char* program = "!(4 <= 1.224)";
+	char* program = "\"Greg\"+\" Jones\"";
 
 //	Chunk chunk;
 //	initChunk(&chunk);

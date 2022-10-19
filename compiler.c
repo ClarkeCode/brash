@@ -76,6 +76,12 @@ void emitConstant(Value value) {
 		emitByte(((byte_t*)&bundledNumber)[x]);
 	}
 }
+void emitString(char* string) {
+	emitByte(OP_STRING);
+	for (size_t x = 0; x < strlen(string)+1; x++) { //Also emits the terminating null byte
+		emitByte((byte_t) string[x]);
+	}
+}
 void endCompiler() { emitReturn(); }
 
 
@@ -158,6 +164,11 @@ void number(bool canAssign) {
 	free(numstring);
 	emitConstant(value);
 }
+void string(bool canAssign) {
+	char* stringval = unbox(&parser.previous.content);
+	emitString(stringval);
+	free(stringval);
+}
 void boolean(bool canAssign) {
 	char* boolstring = unbox(&parser.previous.content);
 	Value value = { VAL_BOOLEAN, {.boolean=(strcmp(boolstring, "true")==0)}};
@@ -191,7 +202,7 @@ ParseRule rules[] = {
 	[TK_ERROR]         = {NULL,     NULL,   PREC_NONE},
 	[TK_EOF]           = {NULL,     NULL,   PREC_NONE},
 	[TK_NEWLINE]       = {NULL,     NULL,   PREC_NONE},
-	[TK_STRING]        = {NULL,     NULL,   PREC_NONE},
+	[TK_STRING]        = {string,   NULL,   PREC_NONE},
 	[TK_NUMBER]        = {number,   NULL,   PREC_NONE},
 	[TK_BOOLEAN]       = {boolean,  NULL,   PREC_NONE},
 	[TK_IDENTIFIER]    = {NULL,     NULL,   PREC_NONE},
