@@ -11,9 +11,9 @@
 #include "debugging.h"
 
 int main(/*int argc, char* argv[]*/) {
-	setDebugFlags(VM_READING_INSTRUCTIONS | VM_STACK_TRACE);
+	setDebugFlags(LEX_TOKEN_PRODUCTION | COM_BYTE_EMISSION | VM_READING_INSTRUCTIONS | VM_STACK_TRACE);
 
-	char* program = "(1 + 2)*3/1.4";
+	char* program = "!(4 <= 1.224)";
 
 //	Chunk chunk;
 //	initChunk(&chunk);

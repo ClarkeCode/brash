@@ -158,6 +158,12 @@ void number(bool canAssign) {
 	free(numstring);
 	emitConstant(value);
 }
+void boolean(bool canAssign) {
+	char* boolstring = unbox(&parser.previous.content);
+	Value value = { VAL_BOOLEAN, {.boolean=(strcmp(boolstring, "true")==0)}};
+	free(boolstring);
+	emitByte(value.as.boolean ? OP_TRUE : OP_FALSE);
+}
 void expression(bool canAssign) {
 	parsePrecedence(PREC_ASSIGNMENT);
 }
@@ -187,7 +193,7 @@ ParseRule rules[] = {
 	[TK_NEWLINE]       = {NULL,     NULL,   PREC_NONE},
 	[TK_STRING]        = {NULL,     NULL,   PREC_NONE},
 	[TK_NUMBER]        = {number,   NULL,   PREC_NONE},
-	[TK_BOOLEAN]       = {NULL,     NULL,   PREC_NONE},
+	[TK_BOOLEAN]       = {boolean,  NULL,   PREC_NONE},
 	[TK_IDENTIFIER]    = {NULL,     NULL,   PREC_NONE},
 	[TK_PAREN_OPEN]    = {grouping, NULL,   PREC_NONE},
 	[TK_PAREN_CLOSE]   = {NULL,     NULL,   PREC_NONE},
@@ -206,9 +212,9 @@ ParseRule rules[] = {
 	[TK_LESSER_EQUAL]  = {NULL,     binary, PREC_COMPARISON},
 	[TK_GREATER_EQUAL] = {NULL,     binary, PREC_COMPARISON},
 	[TK_NOT]           = {unary,    NULL,   PREC_NONE},
-	[TK_AND]           = {NULL,     NULL,   PREC_AND},
-	[TK_OR]            = {NULL,     NULL,   PREC_OR},
-	[TK_XOR]           = {NULL,     NULL,   PREC_XOR},
+	[TK_AND]           = {NULL,     binary, PREC_AND},
+	[TK_OR]            = {NULL,     binary, PREC_OR},
+	[TK_XOR]           = {NULL,     binary, PREC_XOR},
 };
 ParseRule* getRule(token_t type) { return &rules[type]; }
 
@@ -230,6 +236,11 @@ void binary(bool canAssign) {
 		case TK_GREATER:       emitByte(OP_GREATER); break;
 		case TK_LESSER_EQUAL:  emitBytes(OP_GREATER, OP_NOT); break;
 		case TK_GREATER_EQUAL: emitBytes(OP_LESSER, OP_NOT); break;
+
+		case TK_NOT:           emitByte(OP_NOT); break;
+		case TK_AND:           emitByte(OP_AND); break;
+		case TK_OR:            emitByte(OP_OR); break;
+		case TK_XOR:           emitByte(OP_XOR); break;
 		default: return; //Unreachable
 	}
 }

@@ -47,7 +47,13 @@ size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 		case OP_EQUALS:   PRINT_SINGLE_BYTE(OP_EQUALS);
 		case OP_GREATER:  PRINT_SINGLE_BYTE(OP_GREATER);
 		case OP_LESSER:   PRINT_SINGLE_BYTE(OP_LESSER);
+
+		case OP_TRUE:     PRINT_SINGLE_BYTE(OP_TRUE);
+		case OP_FALSE:    PRINT_SINGLE_BYTE(OP_FALSE);
 		case OP_NOT:      PRINT_SINGLE_BYTE(OP_NOT);
+		case OP_AND:      PRINT_SINGLE_BYTE(OP_AND);
+		case OP_OR:       PRINT_SINGLE_BYTE(OP_OR);
+		case OP_XOR:      PRINT_SINGLE_BYTE(OP_XOR);
 
 		case OP_NUMBER:
 			fprintf(outfile, "%-15s", getStr_OpCode(OP_NUMBER));
