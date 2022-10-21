@@ -71,6 +71,23 @@ InterpretResult run() {
 					push(valstring);
 				} break;
 
+			case OP_SET_VARIABLE: {
+					char* variableName = (char*) vm.ip;
+					/*Value val = */pop();
+					printDebug(stdout, VM_READING_INSTRUCTIONS, " '%s'", variableName);
+					vm.ip += strlen(variableName) + 1;
+					//TODO: set variable value
+				} break;
+			case OP_GET_VARIABLE: {
+					char* variableName = (char*) vm.ip;
+					printDebug(stdout, VM_READING_INSTRUCTIONS, " '%s'", variableName);
+					vm.ip += strlen(variableName) + 1;
+					//TODO: get variable value
+				} break;
+			case OP_POP: {
+					pop();
+				} break;
+
 			//Arithmetic instructions
 			case OP_NEGATE: {
 					Value val = pop();
@@ -208,7 +225,7 @@ InterpretResult interpret(const char* source) {
 	disassembleChunk(&chunk, "test chunk");
 
 	InterpretResult result = run();
-	if (hasDebugFlag(VM_STACK_TRACE) && vm.stackTop != vm.stack) {
+	if (hasDebugFlag(VM_STACK_TRACE) && vm.stackTop > vm.stack) {
 		printDebug(stdout, VM_STACK_TRACE, "[VM] Finished with %d items on the value stack:\n", vm.stackTop - vm.stack);
 		while (vm.stackTop-- != vm.stack) {
 			if (vm.stackTop->type == VAL_NUMBER)

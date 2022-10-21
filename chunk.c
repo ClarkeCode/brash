@@ -30,42 +30,65 @@ void freeChunk(Chunk* chunk) {
 #include "enum_lookups.h"
 #define outfile stdout
 #define PRINT_SINGLE_BYTE(op) fprintf(outfile, "%s\n", getStr_OpCode(op)); return offset + 1
+char* makeStringFromBytes(byte_t* bytes) {
+	size_t length = strlen((char*) bytes);
+	char* strcontent = malloc(sizeof(byte_t) * (length + 1));
+	strcpy(strcontent, (char*)bytes);
+	return strcontent;
+}
 size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 	printf("%04d ", offset);
 	byte_t instruction = chunk->code[offset];
 	switch (instruction) {
-		case OP_RETURN:   PRINT_SINGLE_BYTE(OP_RETURN);
-		case OP_NEGATE:   PRINT_SINGLE_BYTE(OP_NEGATE);
-		case OP_ADD:      PRINT_SINGLE_BYTE(OP_ADD);
-		case OP_SUBTRACT: PRINT_SINGLE_BYTE(OP_SUBTRACT);
-		case OP_MULTIPLY: PRINT_SINGLE_BYTE(OP_MULTIPLY);
-		case OP_DIVIDE:   PRINT_SINGLE_BYTE(OP_DIVIDE);
-		case OP_MODULO:   PRINT_SINGLE_BYTE(OP_MODULO);
-		case OP_EQUALS:   PRINT_SINGLE_BYTE(OP_EQUALS);
-		case OP_GREATER:  PRINT_SINGLE_BYTE(OP_GREATER);
-		case OP_LESSER:   PRINT_SINGLE_BYTE(OP_LESSER);
-
-		case OP_TRUE:     PRINT_SINGLE_BYTE(OP_TRUE);
-		case OP_FALSE:    PRINT_SINGLE_BYTE(OP_FALSE);
-		case OP_NOT:      PRINT_SINGLE_BYTE(OP_NOT);
-		case OP_AND:      PRINT_SINGLE_BYTE(OP_AND);
-		case OP_OR:       PRINT_SINGLE_BYTE(OP_OR);
-		case OP_XOR:      PRINT_SINGLE_BYTE(OP_XOR);
+		//Single-byte instructions
+		case OP_RETURN:
+		case OP_POP:
+		case OP_NEGATE:
+		case OP_ADD:
+		case OP_SUBTRACT:
+		case OP_MULTIPLY:
+		case OP_DIVIDE:
+		case OP_MODULO:
+		case OP_EQUALS:
+		case OP_GREATER:
+		case OP_LESSER:
+		case OP_TRUE:
+		case OP_FALSE:
+		case OP_NOT:
+		case OP_AND:
+		case OP_OR:
+		case OP_XOR:
+			PRINT_SINGLE_BYTE(instruction);
 
 		case OP_NUMBER:
 			fprintf(outfile, "%-15s", getStr_OpCode(OP_NUMBER));
 			fprintf(outfile, "%f", readDoubleFromBytes(chunk->code + (offset+1)));
 			fprintf(outfile, "\n");
 			return offset + 1 + 8;
-		case OP_STRING:// {
+		case OP_STRING: {
 			fprintf(outfile, "%-15s", getStr_OpCode(instruction));
-			size_t length = strlen((char*)(chunk->code + offset + 1));
-			char* strcontent = malloc(sizeof(byte_t) * (length+1));
-			strcpy(strcontent, (char*)(chunk->code + offset + 1));
+			char* strcontent = makeStringFromBytes(chunk->code + offset + 1);
+			size_t length = strlen(strcontent);
 			fprintf(outfile, " '%s'\n", strcontent);
 			free(strcontent);
 			return offset + 1 + length + 1;
-			//} break;
+			} break;
+		case OP_SET_VARIABLE: {
+			fprintf(outfile, "%-15s", getStr_OpCode(instruction));
+			char* strcontent = makeStringFromBytes(chunk->code + offset + 1);
+			size_t lenth = strlen(strcontent);
+			fprintf(outfile, " '%s'\n", strcontent);
+			free(strcontent);
+			return offset + 1 + lenth + 1;
+			} break;
+		case OP_GET_VARIABLE: {
+			fprintf(outfile, "%-15s", getStr_OpCode(instruction));
+			char* strcontent = makeStringFromBytes(chunk->code + offset + 1);
+			size_t lenth = strlen(strcontent);
+			fprintf(outfile, " '%s'\n", strcontent);
+			free(strcontent);
+			return offset + 1 + lenth + 1;
+			} break;
 
 		default:
 			fprintf(outfile, "Unknown opcode %d\n", instruction);

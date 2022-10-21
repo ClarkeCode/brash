@@ -4,6 +4,8 @@ typedef enum {
 	TK_ERROR,
 	TK_EOF,
 	TK_NEWLINE,
+	TK_SEMICOLON,
+	TK_VAR,
 
 	TK_STRING,
 	TK_NUMBER,

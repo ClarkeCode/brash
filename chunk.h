@@ -27,6 +27,11 @@ typedef enum {
 	OP_AND,
 	OP_OR,
 	OP_XOR,
+
+	OP_DEF_VARIABLE,
+	OP_SET_VARIABLE,
+	OP_GET_VARIABLE,
+	OP_POP,
 } OpCode;
 
 typedef struct {

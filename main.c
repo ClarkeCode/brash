@@ -13,7 +13,7 @@
 int main(/*int argc, char* argv[]*/) {
 	setDebugFlags(LEX_TOKEN_PRODUCTION | COM_BYTE_EMISSION | VM_READING_INSTRUCTIONS | VM_STACK_TRACE);
 
-	char* program = "\"Greg\"+\" Jones\"";
+	char* program = "var name = \"Greg\"+\" Jones\"\n name + \" Jr.\"";
 
 //	Chunk chunk;
 //	initChunk(&chunk);

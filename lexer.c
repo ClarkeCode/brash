@@ -108,6 +108,10 @@ token_t _produceNextToken(StrView* content, Location* loc) {
 	}
 
 	//Fixed length
+	RET_IF_MATCH(";",   TK_SEMICOLON)
+	RET_IF_MATCH("var", TK_VAR);
+
+
 	RET_IF_MATCH("+", TK_ADD)
 	RET_IF_MATCH("-", TK_SUB)
 	RET_IF_MATCH("*", TK_MULTIPLY)
@@ -128,12 +132,12 @@ token_t _produceNextToken(StrView* content, Location* loc) {
 	//Operators or keywords with potential overlaps
 	RET_IF_MATCH("==", TK_EQUALITY)
 	RET_IF_MATCH("!=", TK_INEQUALITY)
-	RET_IF_MATCH("!", TK_NOT)
-	RET_IF_MATCH("=", TK_ASSIGNMENT)
+	RET_IF_MATCH("!",  TK_NOT)
+	RET_IF_MATCH("=",  TK_ASSIGNMENT)
 	RET_IF_MATCH("<=", TK_LESSER_EQUAL)
 	RET_IF_MATCH(">=", TK_GREATER_EQUAL)
-	RET_IF_MATCH("<", TK_LESSER)
-	RET_IF_MATCH(">", TK_GREATER)
+	RET_IF_MATCH("<",  TK_LESSER)
+	RET_IF_MATCH(">",  TK_GREATER)
 
 	if (char_in(currentChar(), VALID_IDENTIFIER_CHAR)) {
 		while (currentChar() != '\0' && char_in(currentChar(), VALID_IDENTIFIER_CHAR)) {
