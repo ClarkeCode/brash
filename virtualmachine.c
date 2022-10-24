@@ -88,7 +88,8 @@ InterpretResult run() {
 						push(lookup_get(vm.lookup, variableName));
 					}
 					else {
-						fprintf(stdout, "ERR: Variable is not defined.");
+						fprintf(stdout, "ERR: Variable is not defined.\n");
+						return INTERPRET_RUNTIME_ERROR;
 					}
 				} break;
 			case OP_POP: {
@@ -226,10 +227,12 @@ InterpretResult interpret(const char* source) {
 		return INTERPRET_TYPECHECK_ERROR;
 	}
 	
-	initVM();
+	//initVM();
 	vm.chunk = &chunk;
 	vm.ip = vm.chunk->code;
-	disassembleChunk(&chunk, "test chunk");
+	if (hasDebugFlag(COM_CHUNK_DISASSEMBLY)) {
+		disassembleChunk(&chunk, "test chunk");
+	}
 
 	InterpretResult result = run();
 	if (hasDebugFlag(VM_STACK_TRACE) && vm.stackTop > vm.stack) {
@@ -246,7 +249,6 @@ InterpretResult interpret(const char* source) {
 				printDebug(stdout, VM_STACK_TRACE, "\tUnprintable value\n");
 		}
 	}
-	freeObjects();
 	freeChunk(&chunk);
 	return result;
 }

@@ -10,19 +10,36 @@
 
 #include "debugging.h"
 
-int main(/*int argc, char* argv[]*/) {
-	setDebugFlags(LEX_TOKEN_PRODUCTION | COM_BYTE_EMISSION | VM_READING_INSTRUCTIONS | VM_STACK_TRACE);
+int main(int argc, char* argv[]) {
+	argc--; argv++;
+	setDebugFlags(0);//LEX_TOKEN_PRODUCTION | COM_BYTE_EMISSION | VM_READING_INSTRUCTIONS | VM_STACK_TRACE | COM_CHUNK_DISASSEMBLY);
 
-	char* program = "var name = \"Greg\"+\" Jones\"\n name + \" Jr.\"";
+	bool doRepl = argc == 0;
 
-//	Chunk chunk;
-//	initChunk(&chunk);
-//	bool success = compile(program, &chunk);
-//	printf((success ? "Compilation successful\n" : "Compilation failure\n"));
-//	disassembleChunk(&chunk, "test chunk");
-//	freeChunk(&chunk);
+	initVM();
+	if (doRepl) {
+		CmdLine* cline = make_cmdline("brash> ", 8);
+		do {
+			char* program = grabInputLine(cline);
+			printf("\n");
 
-	InterpretResult result = interpret(program);
-	printf("%s\n", getStr_InterpretResult(result));
+			if (strcmp(program, "quit") == 0) {
+				free(program);
+				break;
+			}
+			InterpretResult result = interpret(program);
+			printf("%s\n", getStr_InterpretResult(result));
+			free(program);
+		} while (true);
+		free_cmdline(cline);
+		freeObjects();
+	}
+	else {
+		char* program = argv[0];// = "var name = \"Greg\"+\" Jones\"\n name + \" Jr.\"";
+		InterpretResult result = interpret(program);
+		freeObjects();
+		printf("%s\n", getStr_InterpretResult(result));
+	}
+
 	return 0;
 }
