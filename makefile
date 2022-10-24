@@ -1,7 +1,7 @@
 # Used https://opensource.com/article/18/8/what-how-makefile as a reference
 
-CC = gcc -g -Wall -Wextra
-COMPILERFLAGS = -c
+CC = gcc -g -Wall -Wextra -Wno-unused-parameter
+COMPILERFLAGS = -c -D BRASH_ALLOW_DEBUG_OUTPUT
 LINKERFLAGS = -lm
 
 BUILDDIR := build
@@ -23,8 +23,7 @@ build: $(SRCS)
 	@$(MAKE) $(FINAL_TARGET)
 
 generated:
-	./header_generator.sh lexer.c BRASH_LEXER > lexer.h
-	./generate_enumeration_lookups.sh enumerations.h > enum_lookups.c
+	./gen_enum_lookups.sh *.h > enum_lookups.c
 	./header_generator.sh enum_lookups.c ENUM_LOOKUPS > enum_lookups.h
 
 $(FINAL_TARGET): $(OBJS)
@@ -36,4 +35,4 @@ $(BUILDDIR)/%.o: %.c
 clean:
 	rm -f *.out *.o $(FINAL_TARGET)
 	rm -rf build
-	rm -f lexer.h enum_lookups.h enum_lookups.c
+	rm -f enum_lookups.h enum_lookups.c
