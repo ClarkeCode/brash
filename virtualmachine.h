@@ -1,6 +1,7 @@
 #ifndef BRASH_VM
 #define BRASH_VM
 #include "chunk.h"
+#include "variablelookup.h"
 
 #define STACK_MAX 512
 typedef struct {
@@ -8,6 +9,8 @@ typedef struct {
 	byte_t* ip;
 	Value stack[STACK_MAX];
 	Value* stackTop;
+
+	VariableLookup* lookup;
 
 	Object* objects;
 	Object* mostRecentObject;

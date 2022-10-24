@@ -8,7 +8,7 @@
 VM vm;
 
 void resetStack() { vm.stackTop = vm.stack; }
-void initVM() { vm.objects = NULL; vm.mostRecentObject = NULL; resetStack(); }
+void initVM() { vm.objects = NULL; vm.mostRecentObject = NULL; resetStack(); vm.lookup = make_variable_lookup(); }
 
 void addObject(Object* object) {
 	if (vm.objects == NULL) {
@@ -73,16 +73,23 @@ InterpretResult run() {
 
 			case OP_SET_VARIABLE: {
 					char* variableName = (char*) vm.ip;
-					/*Value val = */pop();
+					Value val = pop();
 					printDebug(stdout, VM_READING_INSTRUCTIONS, " '%s'", variableName);
 					vm.ip += strlen(variableName) + 1;
 					//TODO: set variable value
+					lookup_add(vm.lookup, variableName, val);
 				} break;
 			case OP_GET_VARIABLE: {
 					char* variableName = (char*) vm.ip;
 					printDebug(stdout, VM_READING_INSTRUCTIONS, " '%s'", variableName);
 					vm.ip += strlen(variableName) + 1;
 					//TODO: get variable value
+					if (lookup_has(vm.lookup, variableName)) {
+						push(lookup_get(vm.lookup, variableName));
+					}
+					else {
+						fprintf(stdout, "ERR: Variable is not defined.");
+					}
 				} break;
 			case OP_POP: {
 					pop();
