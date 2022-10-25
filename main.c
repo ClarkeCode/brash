@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
 				argc--; argv++;
 				if (argc == 0) break; //no file specified
 				pinput.modeDisassembly = true;
-				pinput.outfile = argv[0];
+				pinput.infile = argv[0];
 				argc--; argv++;
 			}
 			if (argv[0] && strcmp(argv[0], "-s") == 0) {
