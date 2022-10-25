@@ -12,11 +12,11 @@
 
 int main(int argc, char* argv[]) {
 	argc--; argv++;
-	setDebugFlags(0);//LEX_TOKEN_PRODUCTION | COM_BYTE_EMISSION | VM_READING_INSTRUCTIONS | VM_STACK_TRACE | COM_CHUNK_DISASSEMBLY);
+	setDebugFlags(LEX_TOKEN_PRODUCTION | COM_BYTE_EMISSION | VM_READING_INSTRUCTIONS | VM_STACK_TRACE | COM_CHUNK_DISASSEMBLY);
 
 	bool doRepl = argc == 0;
 
-	initVM();
+	initVM((doRepl ? VM_MODE_INTERACTIVE : VM_MODE_STATIC));
 	if (doRepl) {
 		CmdLine* cline = make_cmdline("brash> ", 8);
 		do {
@@ -27,15 +27,15 @@ int main(int argc, char* argv[]) {
 				free(program);
 				break;
 			}
-			InterpretResult result = interpret(program);
-			printf("%s\n", getStr_InterpretResult(result));
+			/*InterpretResult result = */interpret(program);
+			//printf("%s\n", getStr_InterpretResult(result));
 			free(program);
 		} while (true);
 		free_cmdline(cline);
 		freeObjects();
 	}
 	else {
-		char* program = argv[0];// = "var name = \"Greg\"+\" Jones\"\n name + \" Jr.\"";
+		char* program = "var name = \"Greg\"+\" Jones\"\n name + \" Jr.\"";
 		InterpretResult result = interpret(program);
 		freeObjects();
 		printf("%s\n", getStr_InterpretResult(result));

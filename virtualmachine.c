@@ -8,7 +8,13 @@
 VM vm;
 
 void resetStack() { vm.stackTop = vm.stack; }
-void initVM() { vm.objects = NULL; vm.mostRecentObject = NULL; resetStack(); vm.lookup = make_variable_lookup(); }
+void initVM(VM_Mode vmMode) {
+	vm.mode = vmMode;
+	vm.objects = NULL;
+	vm.mostRecentObject = NULL;
+	resetStack();
+	vm.lookup = make_variable_lookup();
+}
 
 void addObject(Object* object) {
 	if (vm.objects == NULL) {
@@ -92,8 +98,18 @@ InterpretResult run() {
 						return INTERPRET_RUNTIME_ERROR;
 					}
 				} break;
+#define VAL_AS_STRING(val) (((ObjectString*) val.as.object)->cstr)
 			case OP_POP: {
-					pop();
+					Value val = pop();
+					if (vm.mode == VM_MODE_INTERACTIVE) {
+						if (val.type == VAL_NUMBER) fprintf(stdout, "%f\n", val.as.number);
+						if (val.type == VAL_BOOLEAN) fprintf(stdout, "%s\n", (val.as.boolean ? "true" : "false"));
+						if (val.type == VAL_OBJECT) {
+							if (val.as.object->type == OBJ_STRING) {
+								fprintf(stdout, "%s\n", VAL_AS_STRING(val));
+							}
+						}
+					}
 				} break;
 
 			//Arithmetic instructions

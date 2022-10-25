@@ -3,8 +3,14 @@
 #include "chunk.h"
 #include "variablelookup.h"
 
+typedef enum {
+	VM_MODE_STATIC,
+	VM_MODE_INTERACTIVE,
+} VM_Mode;
+
 #define STACK_MAX 512
 typedef struct {
+	VM_Mode mode;
 	Chunk* chunk;
 	byte_t* ip;
 	Value stack[STACK_MAX];
@@ -27,7 +33,7 @@ typedef enum {
 	INTERPRET_RUNTIME_ERROR
 } InterpretResult;
 
-void initVM();
+void initVM(VM_Mode vmMode);
 InterpretResult interpret(const char* source);
 void freeObjects();
 
