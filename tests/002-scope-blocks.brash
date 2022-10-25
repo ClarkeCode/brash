@@ -1,0 +1,4 @@
+var name = "Greg"
+{
+	var num = 2.456
+}
