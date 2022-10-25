@@ -107,3 +107,10 @@ void disassembleChunk(Chunk* chunk, const char* name) {
 		offset = disassembleInstruction(chunk, offset);
 	}
 }
+void serializeChunk(Chunk* chunk, const char* filename) {
+	FILE* outfile = fopen(filename, "wb");
+	for (size_t x = 0; x < chunk->size; x++) {
+		putc((char)chunk->code[x], outfile);
+	}
+	fclose(outfile);
+}

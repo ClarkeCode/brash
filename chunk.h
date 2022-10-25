@@ -44,4 +44,5 @@ void writeChunk(Chunk* chunk, byte_t byte, Location location);
 void freeChunk(Chunk* chunk);
 
 void disassembleChunk(Chunk* chunk, const char* name);
+void serializeChunk(Chunk* chunk, const char* filename);
 #endif
