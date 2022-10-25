@@ -166,6 +166,7 @@ ParseRule rules[] = {
 
 //forward declarations
 void expression();
+void declaration();
 void binary(bool canAssign);
 void parsePrecedence(Precedence precedence);
 
@@ -295,11 +296,28 @@ void parsePrecedence(Precedence precedence) {
 void expression() { parsePrecedence(PREC_ASSIGNMENT); }
 void expressionStatement() {
 	expression();
-	token_t terminators[] = {TK_EOF, TK_NEWLINE, TK_SEMICOLON};
-	consumeIfMultiple(terminators, 3, "Expected an expression terminator");
+	token_t terminators[] = {TK_EOF, TK_NEWLINE, TK_SEMICOLON, TK_BRACE_OPEN};
+	consumeIfMultiple(terminators, 4, "Expected an expression terminator");
 	emitByte(OP_POP);
 }
-void statement() { expressionStatement(); }
+void block() {
+	while (match(TK_NEWLINE)) {} //Consume any newlines
+	emitByte(OP_ENTER_SCOPE);
+	while (!checkIf(TK_BRACE_CLOSE) && !checkIf(TK_EOF)) {
+		declaration();
+	}
+	consumeIf(TK_BRACE_CLOSE, "Expect '}' after block.");
+	emitByte(OP_EXIT_SCOPE);
+	while (match(TK_NEWLINE)) {} //Consume any newlines
+}
+void statement() {
+	if (match(TK_BRACE_OPEN)) {
+		block();
+	}
+	else {
+		expressionStatement();
+	}
+}
 void variableDeclaration() {
 	consumeIf(TK_IDENTIFIER, "Expected variable name.");
 	char* identString = unbox(&parser.previous.content);
@@ -307,8 +325,8 @@ void variableDeclaration() {
 	if (match(TK_ASSIGNMENT)) {
 		expression();
 	}
-	token_t terminators[] = {TK_EOF, TK_NEWLINE, TK_SEMICOLON};
-	consumeIfMultiple(terminators, 3, "Expected an expression terminator.");
+	token_t terminators[] = {TK_EOF, TK_NEWLINE, TK_SEMICOLON, TK_BRACE_OPEN};
+	consumeIfMultiple(terminators, 4, "Expected an expression terminator.");
 	emitByte(OP_SET_VARIABLE);
 	emitString(identString);
 	free(identString);

@@ -58,6 +58,8 @@ size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 		case OP_AND:
 		case OP_OR:
 		case OP_XOR:
+		case OP_ENTER_SCOPE:
+		case OP_EXIT_SCOPE:
 			PRINT_SINGLE_BYTE(instruction);
 
 		case OP_NUMBER:
