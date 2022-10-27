@@ -8,6 +8,7 @@ typedef enum {
 	TK_VAR,
 	TK_IF,
 	TK_ELSE,
+	TK_PRINT,
 
 	TK_STRING,
 	TK_NUMBER,

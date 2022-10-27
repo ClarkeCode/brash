@@ -108,9 +108,11 @@ token_t _produceNextToken(StrView* content, Location* loc) {
 	}
 
 	//Fixed length
-	RET_IF_MATCH(";",   TK_SEMICOLON);
-	RET_IF_MATCH("var", TK_VAR);
-	RET_IF_MATCH("if",  TK_IF);
+	RET_IF_MATCH(";",     TK_SEMICOLON);
+	RET_IF_MATCH("var",   TK_VAR);
+	RET_IF_MATCH("if",    TK_IF);
+	RET_IF_MATCH("else",  TK_ELSE);
+	RET_IF_MATCH("print", TK_PRINT);
 
 
 	RET_IF_MATCH("+", TK_ADD)
@@ -124,10 +126,10 @@ token_t _produceNextToken(StrView* content, Location* loc) {
 	RET_IF_MATCH("{", TK_BRACE_OPEN)
 	RET_IF_MATCH("}", TK_BRACE_CLOSE)
 
-	RET_IF_MATCH("&&", TK_AND)
-	RET_IF_MATCH("||", TK_OR)
-	RET_IF_MATCH("^^", TK_XOR)
-	RET_IF_MATCH("true", TK_BOOLEAN)
+	RET_IF_MATCH("&&",    TK_AND)
+	RET_IF_MATCH("||",    TK_OR)
+	RET_IF_MATCH("^^",    TK_XOR)
+	RET_IF_MATCH("true",  TK_BOOLEAN)
 	RET_IF_MATCH("false", TK_BOOLEAN)
 
 	//Operators or keywords with potential overlaps

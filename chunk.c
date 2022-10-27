@@ -61,8 +61,10 @@ size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 		case OP_XOR:
 		case OP_ENTER_SCOPE:
 		case OP_EXIT_SCOPE:
+		case OP_PRINT:
 			PRINT_SINGLE_BYTE(instruction);
 
+		//Multi-byte instructions
 		case OP_NUMBER:
 			fprintf(outfile, ONEBYTE_FMT , getStr_OpCode(instruction));
 			fprintf(outfile, "%f\n", readDoubleFromBytes(chunk->code + (offset+1)));
@@ -101,11 +103,12 @@ size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 			} break;
 
 		default:
-			fprintf(outfile, "Unknown opcode %d\n", instruction);
+			fprintf(outfile, "Unknown opcode %d '%c'\n", instruction, instruction);
 			return offset + 1;
 	}
 }
 #undef PRINT_SINGLE_BYTE
+#undef ONEBYTE_FMT
 #undef outfile
 
 void disassembleChunk(Chunk* chunk, const char* name) {

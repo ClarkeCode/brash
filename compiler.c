@@ -331,9 +331,13 @@ void statement() {
 		expression();
 
 		size_t jumpOffset = emitJump(OP_JUMP_IF_FALSE);
-		//emitByte(OP_POP); //when the IF evaluates to true, pop it off the stack
 		statement();
 		patchJump(jumpOffset);
+	}
+
+	else if (match(TK_PRINT)) { //Print statement
+		expression();
+		emitByte(OP_PRINT);
 	}
 
 	else if (match(TK_BRACE_OPEN))
@@ -357,7 +361,8 @@ void variableDeclaration() {
 }
 void declaration() {
 	while (match(TK_NEWLINE)) {} //Consume any newlines
-	if (match(TK_VAR)) {
+	if (match(TK_EOF)) return;
+	else if (match(TK_VAR)) {
 		variableDeclaration();
 	}
 	else

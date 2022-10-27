@@ -36,6 +36,7 @@ typedef enum {
 	OP_ENTER_SCOPE,
 	OP_EXIT_SCOPE,
 
+	OP_PRINT,
 	OP_JUMP,
 	OP_JUMP_IF_FALSE,
 } OpCode;
