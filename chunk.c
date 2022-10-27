@@ -29,6 +29,7 @@ void freeChunk(Chunk* chunk) {
 #include <string.h>
 #include "enum_lookups.h"
 #define outfile stdout
+#define ONEBYTE_FMT "%-18s"
 #define PRINT_SINGLE_BYTE(op) fprintf(outfile, "%s\n", getStr_OpCode(op)); return offset + 1
 char* makeStringFromBytes(byte_t* bytes) {
 	size_t length = strlen((char*) bytes);
@@ -63,33 +64,40 @@ size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 			PRINT_SINGLE_BYTE(instruction);
 
 		case OP_NUMBER:
-			fprintf(outfile, "%-15s", getStr_OpCode(OP_NUMBER));
-			fprintf(outfile, "%f", readDoubleFromBytes(chunk->code + (offset+1)));
-			fprintf(outfile, "\n");
+			fprintf(outfile, ONEBYTE_FMT , getStr_OpCode(instruction));
+			fprintf(outfile, "%f\n", readDoubleFromBytes(chunk->code + (offset+1)));
 			return offset + 1 + 8;
 		case OP_STRING: {
-			fprintf(outfile, "%-15s", getStr_OpCode(instruction));
+			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
 			char* strcontent = makeStringFromBytes(chunk->code + offset + 1);
 			size_t length = strlen(strcontent);
-			fprintf(outfile, " '%s'\n", strcontent);
+			fprintf(outfile, "'%s'\n", strcontent);
 			free(strcontent);
 			return offset + 1 + length + 1;
 			} break;
 		case OP_SET_VARIABLE: {
-			fprintf(outfile, "%-15s", getStr_OpCode(instruction));
+			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
 			char* strcontent = makeStringFromBytes(chunk->code + offset + 1);
 			size_t lenth = strlen(strcontent);
-			fprintf(outfile, " '%s'\n", strcontent);
+			fprintf(outfile, "'%s'\n", strcontent);
 			free(strcontent);
 			return offset + 1 + lenth + 1;
 			} break;
 		case OP_GET_VARIABLE: {
-			fprintf(outfile, "%-15s", getStr_OpCode(instruction));
+			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
 			char* strcontent = makeStringFromBytes(chunk->code + offset + 1);
 			size_t lenth = strlen(strcontent);
-			fprintf(outfile, " '%s'\n", strcontent);
+			fprintf(outfile, "'%s'\n", strcontent);
 			free(strcontent);
 			return offset + 1 + lenth + 1;
+			} break;
+
+		case OP_JUMP:
+		case OP_JUMP_IF_FALSE: {
+			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
+			int16_t jumpRelative = readInt16FromBytes(chunk->code + offset + 1);
+			fprintf(outfile, "%+d (goto: %d)\n", jumpRelative, offset + jumpRelative);
+			return offset + 3;
 			} break;
 
 		default:

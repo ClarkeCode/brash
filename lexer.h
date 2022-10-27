@@ -6,6 +6,8 @@ typedef enum {
 	TK_NEWLINE,
 	TK_SEMICOLON,
 	TK_VAR,
+	TK_IF,
+	TK_ELSE,
 
 	TK_STRING,
 	TK_NUMBER,

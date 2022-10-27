@@ -108,8 +108,9 @@ token_t _produceNextToken(StrView* content, Location* loc) {
 	}
 
 	//Fixed length
-	RET_IF_MATCH(";",   TK_SEMICOLON)
+	RET_IF_MATCH(";",   TK_SEMICOLON);
 	RET_IF_MATCH("var", TK_VAR);
+	RET_IF_MATCH("if",  TK_IF);
 
 
 	RET_IF_MATCH("+", TK_ADD)

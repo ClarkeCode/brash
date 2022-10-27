@@ -44,3 +44,24 @@ double readDoubleFromBytes(void* sourceBuffer) {
 	transpose8Bytes(sourceBuffer, &numericVal);
 	return numericVal;
 }
+
+void transpose2Bytes(void* sourceBuffer, void* outBuffer) {
+	byte_t* source = sourceBuffer;
+	byte_t* output = outBuffer;
+
+	if (isSystemBigEndian()) {
+		//no conversion needed
+		output[0] = *(source + 0);
+		output[1] = *(source + 1);
+	}
+	else {
+		output[0] = *(source + 1);
+		output[1] = *(source + 0);
+	}
+}
+//Assumes that the source buffer is the byte representation of a double in Big-Endian order
+int16_t readInt16FromBytes(void* sourceBuffer) {
+	int16_t numericVal = 0;
+	transpose2Bytes(sourceBuffer, &numericVal);
+	return numericVal;
+}

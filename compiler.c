@@ -95,6 +95,21 @@ void emitString(char* string) {
 	}
 }
 void endCompiler() { emitReturn(); }
+size_t emitJump(byte_t byte) {
+	size_t offset = currentChunk()->size;
+	emitByte(byte);
+	emitBytes(0xff, 0xff);
+	return offset;
+}
+void patchJump(size_t jumpOffset) {
+	size_t currentOffset = currentChunk()->size;
+	if ((currentOffset-jumpOffset) > INT16_MAX) {
+		fprintf(stderr, "Cannot jump; too many instructions.");
+		exit(EXIT_FAILURE);
+	}
+	int16_t bundledNumber = currentOffset - jumpOffset;
+	transpose2Bytes(&bundledNumber, currentChunk()->code + jumpOffset + 1);
+}
 
 
 
@@ -169,6 +184,9 @@ void expression();
 void declaration();
 void binary(bool canAssign);
 void parsePrecedence(Precedence precedence);
+void expression();
+void statement();
+void block();
 
 void number(bool canAssign) {
 	Value value = {0};
@@ -215,35 +233,45 @@ void unary(bool canAssign) {
 	}
 }
 
+void ifStatement() {
+	expression();
+
+	size_t jumpOffset = emitJump(OP_JUMP_IF_FALSE);
+	//emitByte(OP_POP); //when the IF evaluates to true, pop it off the stack
+	statement();
+	patchJump(jumpOffset);
+}
 
 ParseRule rules[] = {
-	[TK_ERROR]         = {NULL,       NULL,   PREC_NONE},
-	[TK_EOF]           = {NULL,       NULL,   PREC_NONE},
-	[TK_NEWLINE]       = {NULL,       NULL,   PREC_NONE},
-	[TK_STRING]        = {string,     NULL,   PREC_NONE},
-	[TK_NUMBER]        = {number,     NULL,   PREC_NONE},
-	[TK_BOOLEAN]       = {boolean,    NULL,   PREC_NONE},
-	[TK_IDENTIFIER]    = {identifier, NULL,   PREC_NONE},
-	[TK_PAREN_OPEN]    = {grouping,   NULL,   PREC_NONE},
-	[TK_PAREN_CLOSE]   = {NULL,       NULL,   PREC_NONE},
-	[TK_BRACE_OPEN]    = {NULL,       NULL,   PREC_NONE},
-	[TK_BRACE_CLOSE]   = {NULL,       NULL,   PREC_NONE},
-	[TK_ADD]           = {NULL,       binary, PREC_TERM},
-	[TK_SUB]           = {unary,      binary, PREC_TERM},
-	[TK_MULTIPLY]      = {NULL,       binary, PREC_FACTOR},
-	[TK_DIVIDE]        = {NULL,       binary, PREC_FACTOR},
-	[TK_MODULO]        = {NULL,       binary, PREC_FACTOR},
-	[TK_ASSIGNMENT]    = {NULL,       NULL,   PREC_NONE},
-	[TK_EQUALITY]      = {NULL,       binary, PREC_EQUALITY},
-	[TK_INEQUALITY]    = {NULL,       binary, PREC_EQUALITY},
-	[TK_LESSER]        = {NULL,       binary, PREC_COMPARISON},
-	[TK_GREATER]       = {NULL,       binary, PREC_COMPARISON},
-	[TK_LESSER_EQUAL]  = {NULL,       binary, PREC_COMPARISON},
-	[TK_GREATER_EQUAL] = {NULL,       binary, PREC_COMPARISON},
-	[TK_NOT]           = {unary,      NULL,   PREC_NONE},
-	[TK_AND]           = {NULL,       binary, PREC_AND},
-	[TK_OR]            = {NULL,       binary, PREC_OR},
-	[TK_XOR]           = {NULL,       binary, PREC_XOR},
+	[TK_ERROR]         = {NULL,        NULL,   PREC_NONE},
+	[TK_EOF]           = {NULL,        NULL,   PREC_NONE},
+	[TK_NEWLINE]       = {NULL,        NULL,   PREC_NONE},
+	[TK_IF]            = {NULL,        NULL,   PREC_NONE},
+	[TK_ELSE]          = {NULL,        NULL,   PREC_NONE},
+	[TK_STRING]        = {string,      NULL,   PREC_NONE},
+	[TK_NUMBER]        = {number,      NULL,   PREC_NONE},
+	[TK_BOOLEAN]       = {boolean,     NULL,   PREC_NONE},
+	[TK_IDENTIFIER]    = {identifier,  NULL,   PREC_NONE},
+	[TK_PAREN_OPEN]    = {grouping,    NULL,   PREC_NONE},
+	[TK_PAREN_CLOSE]   = {NULL,        NULL,   PREC_NONE},
+	[TK_BRACE_OPEN]    = {NULL,        NULL,   PREC_NONE},
+	[TK_BRACE_CLOSE]   = {NULL,        NULL,   PREC_NONE},
+	[TK_ADD]           = {NULL,        binary, PREC_TERM},
+	[TK_SUB]           = {unary,       binary, PREC_TERM},
+	[TK_MULTIPLY]      = {NULL,        binary, PREC_FACTOR},
+	[TK_DIVIDE]        = {NULL,        binary, PREC_FACTOR},
+	[TK_MODULO]        = {NULL,        binary, PREC_FACTOR},
+	[TK_ASSIGNMENT]    = {NULL,        NULL,   PREC_NONE},
+	[TK_EQUALITY]      = {NULL,        binary, PREC_EQUALITY},
+	[TK_INEQUALITY]    = {NULL,        binary, PREC_EQUALITY},
+	[TK_LESSER]        = {NULL,        binary, PREC_COMPARISON},
+	[TK_GREATER]       = {NULL,        binary, PREC_COMPARISON},
+	[TK_LESSER_EQUAL]  = {NULL,        binary, PREC_COMPARISON},
+	[TK_GREATER_EQUAL] = {NULL,        binary, PREC_COMPARISON},
+	[TK_NOT]           = {unary,       NULL,   PREC_NONE},
+	[TK_AND]           = {NULL,        binary, PREC_AND},
+	[TK_OR]            = {NULL,        binary, PREC_OR},
+	[TK_XOR]           = {NULL,        binary, PREC_XOR},
 };
 ParseRule* getRule(token_t type) { return &rules[type]; }
 
@@ -311,9 +339,10 @@ void block() {
 	while (match(TK_NEWLINE)) {} //Consume any newlines
 }
 void statement() {
-	if (match(TK_BRACE_OPEN)) {
+	if (match(TK_IF))
+		ifStatement();
+	if (match(TK_BRACE_OPEN))
 		block();
-	}
 	else {
 		expressionStatement();
 	}
@@ -332,6 +361,7 @@ void variableDeclaration() {
 	free(identString);
 }
 void declaration() {
+	while (match(TK_NEWLINE)) {} //Consume any newlines
 	if (match(TK_VAR)) {
 		variableDeclaration();
 	}
