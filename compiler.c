@@ -80,11 +80,9 @@ void emitBytes(byte_t b1, byte_t b2) {
 	emitByte(b2);
 }
 void emitReturn() { emitByte(OP_RETURN); }
-void emitConstant(Value value) {
-	emitByte(OP_NUMBER);
-
+void emitDouble(double toBundle) {
 	double bundledNumber = 0;
-	transpose8Bytes(&value.as.number, &bundledNumber);
+	transpose8Bytes(&toBundle, &bundledNumber);
 	for (size_t x = 0; x < 8; x++) {
 		emitByte(((byte_t*)&bundledNumber)[x]);
 	}
@@ -189,12 +187,11 @@ void statement();
 void block();
 
 void number(bool canAssign) {
-	Value value = {0};
-	value.type = VAL_NUMBER;
 	char* numstring = unbox(&parser.previous.content);
-	value.as.number = strtod(numstring, NULL);
+	double num = strtod(numstring, NULL);
 	free(numstring);
-	emitConstant(value);
+	emitByte(OP_NUMBER);
+	emitDouble(num);
 }
 void identifier(bool canAssign) {
 	char* stringval = unbox(&parser.previous.content);
@@ -210,9 +207,8 @@ void string(bool canAssign) {
 }
 void boolean(bool canAssign) {
 	char* boolstring = unbox(&parser.previous.content);
-	Value value = { VAL_BOOLEAN, {.boolean=(strcmp(boolstring, "true")==0)}};
+	emitByte((strcmp(boolstring, "true")==0) ? OP_TRUE : OP_FALSE);
 	free(boolstring);
-	emitByte(value.as.boolean ? OP_TRUE : OP_FALSE);
 }
 void grouping(bool canAssign) {
 	expression(canAssign);
@@ -233,14 +229,6 @@ void unary(bool canAssign) {
 	}
 }
 
-void ifStatement() {
-	expression();
-
-	size_t jumpOffset = emitJump(OP_JUMP_IF_FALSE);
-	//emitByte(OP_POP); //when the IF evaluates to true, pop it off the stack
-	statement();
-	patchJump(jumpOffset);
-}
 
 ParseRule rules[] = {
 	[TK_ERROR]         = {NULL,        NULL,   PREC_NONE},
@@ -339,9 +327,16 @@ void block() {
 	while (match(TK_NEWLINE)) {} //Consume any newlines
 }
 void statement() {
-	if (match(TK_IF))
-		ifStatement();
-	if (match(TK_BRACE_OPEN))
+	if (match(TK_IF)) { //If statement
+		expression();
+
+		size_t jumpOffset = emitJump(OP_JUMP_IF_FALSE);
+		//emitByte(OP_POP); //when the IF evaluates to true, pop it off the stack
+		statement();
+		patchJump(jumpOffset);
+	}
+
+	else if (match(TK_BRACE_OPEN))
 		block();
 	else {
 		expressionStatement();
