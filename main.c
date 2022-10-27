@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
 		InterpretResult result = interpret(source);
 		free(source);
 		freeObjects();
-		printf("%s\n", getStr_InterpretResult(result));
+		return (result == INTERPRET_OK ? EXIT_SUCCESS : result);
 	}
 
 	return 0;
