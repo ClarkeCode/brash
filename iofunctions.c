@@ -3,6 +3,10 @@
 #include "iofunctions.h"
 
 char* readFile(char* filePath) {
+	if (!filePath) {
+		fprintf(stderr, "No file specified\n");
+		exit(EXIT_FAILURE);
+	}
 	FILE* sourceFile = fopen(filePath, "rb");
 
 	fseek(sourceFile, 0, SEEK_END);
