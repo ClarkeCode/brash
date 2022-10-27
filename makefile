@@ -28,6 +28,7 @@ generated:
 
 $(FINAL_TARGET): $(OBJS)
 	$(CC) $(OBJS) -o $@ $(LINKERFLAGS)
+	@cp $(FINAL_TARGET) tests
 
 $(BUILDDIR)/%.o: %.c
 	$(CC) $(COMPILERFLAGS) $< -o $@
