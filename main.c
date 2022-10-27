@@ -53,7 +53,11 @@ int main(int argc, char* argv[]) {
 				argc--; argv++;
 				pinput.behaviourSilent = true;
 			}
-			else { argc--; argv++; }
+			else {
+				pinput.modeInterpret = true;
+				pinput.infile = argv[0];
+				argc--; argv++;
+			}
 		}
 	}
 
@@ -62,7 +66,7 @@ int main(int argc, char* argv[]) {
 	else
 		setDebugFlags(LEX_TOKEN_PRODUCTION | COM_BYTE_EMISSION | VM_READING_INSTRUCTIONS | VM_STACK_TRACE | COM_CHUNK_DISASSEMBLY);
 
-	if (pinput.modeCompilation) {
+	if (pinput.modeCompilation) { //Compile
 		char* srcfile = pinput.infile;
 		char* source = readFile(srcfile);
 
@@ -77,7 +81,7 @@ int main(int argc, char* argv[]) {
 		return (compSuccess ? EXIT_SUCCESS : EXIT_FAILURE);
 	}
 
-	if (pinput.modeDisassembly) {
+	if (pinput.modeDisassembly) { //Disassemble
 		char* content = readFile(pinput.infile);
 
 		Chunk chunk;
@@ -107,9 +111,11 @@ int main(int argc, char* argv[]) {
 		free_cmdline(cline);
 		freeObjects();
 	}
-	else {
-		char* program = "var name = \"Greg\"+\" Jones\"\n name + \" Jr.\"";
-		InterpretResult result = interpret(program);
+	else if (pinput.modeInterpret) {
+		char* srcfile = pinput.infile;
+		char* source = readFile(srcfile);
+		InterpretResult result = interpret(source);
+		free(source);
 		freeObjects();
 		printf("%s\n", getStr_InterpretResult(result));
 	}

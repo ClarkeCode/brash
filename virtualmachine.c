@@ -210,6 +210,19 @@ InterpretResult run() {
 					push(result);
 				} break;
 
+			case OP_PRINT: {
+					Value val = pop();
+					if (val.type == VAL_BOOLEAN)
+						fprintf(stdout, (val.as.boolean ? "true" : "false"));
+					else if (val.type == VAL_NUMBER)
+						fprintf(stdout, "%lf", val.as.number);
+					else if (val.type == VAL_OBJECT) {
+						if (vm.stackTop->as.object->type == OBJ_STRING)
+							fprintf(stdout, "%s", ((ObjectString*)vm.stackTop->as.object)->cstr);
+					}
+					fprintf(stdout, "\n");
+				} break;
+
 			case OP_RETURN: {
 					printDebug(stdout, VM_READING_INSTRUCTIONS, "\n");
 					return INTERPRET_OK;
