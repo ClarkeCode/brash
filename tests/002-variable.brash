@@ -1,2 +1,2 @@
 var name = "Greg" + " Jones"
-name + " Jr."
+print name + " Jr."

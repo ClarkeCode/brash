@@ -1,0 +1,35 @@
+print true
+print false
+
+print "Logical AND"
+print true  && true
+print true  && false
+print false && true
+print false && false
+
+print "Logical OR"
+print true  || true
+print true  || false
+print false || true
+print false || false
+
+print "Logical XOR"
+print true  ^^ true
+print true  ^^ false
+print false ^^ true
+print false ^^ false
+
+print "Arithmetic Operations"
+print 1
+print 1.22
+print -1
+print 1 + 1
+print 3 - 2
+print 1.5 * 2
+print 7 / 3
+print 3.3 % 2
+
+print "Strings"
+print "Hello"
+print "Bugs" + " " + "Bunny"
+

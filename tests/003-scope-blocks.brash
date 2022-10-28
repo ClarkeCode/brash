@@ -1,4 +1,6 @@
 var name = "Greg"
 {
 	var num = 2.456
+	print name
+	print num
 }
