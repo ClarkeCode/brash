@@ -239,19 +239,19 @@ InterpretResult run() {
 			case OP_AND: {
 					Value b = pop();
 					Value a = pop();
-					Value result = { VAL_BOOLEAN, {.number=(a.as.boolean && b.as.boolean)} };
+					Value result = { VAL_BOOLEAN, {.boolean=(a.as.boolean && b.as.boolean)} };
 					push(result);
 				} break;
 			case OP_OR: {
 					Value b = pop();
 					Value a = pop();
-					Value result = { VAL_BOOLEAN, {.number=(a.as.boolean || b.as.boolean)} };
+					Value result = { VAL_BOOLEAN, {.boolean=(a.as.boolean || b.as.boolean)} };
 					push(result);
 				} break;
 			case OP_XOR: {
 					Value b = pop();
 					Value a = pop();
-					Value result = { VAL_BOOLEAN, {.number=(a.as.boolean ^ b.as.boolean)} };
+					Value result = { VAL_BOOLEAN, {.boolean=(a.as.boolean ^ b.as.boolean)} };
 					push(result);
 				} break;
 
