@@ -63,8 +63,8 @@ int main(int argc, char* argv[]) {
 
 	if (pinput.behaviourSilent)
 		setDebugFlags(0);
-	else
-		setDebugFlags(LEX_TOKEN_PRODUCTION | COM_BYTE_EMISSION | VM_READING_INSTRUCTIONS | VM_STACK_TRACE | COM_CHUNK_DISASSEMBLY);
+//	else
+//		setDebugFlags(LEX_TOKEN_PRODUCTION | COM_BYTE_EMISSION | VM_READING_INSTRUCTIONS | VM_STACK_TRACE | COM_CHUNK_DISASSEMBLY);
 
 	if (pinput.modeCompilation) { //Compile
 		char* srcfile = pinput.infile;
