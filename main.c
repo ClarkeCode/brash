@@ -109,14 +109,14 @@ int main(int argc, char* argv[]) {
 			free(program);
 		} while (true);
 		free_cmdline(cline);
-		freeObjects();
+		freeVM();
 	}
 	else if (pinput.modeInterpret) {
 		char* srcfile = pinput.infile;
 		char* source = readFile(srcfile);
 		InterpretResult result = interpret(source);
 		free(source);
-		freeObjects();
+		freeVM();
 		return (result == INTERPRET_OK ? EXIT_SUCCESS : result);
 	}
 

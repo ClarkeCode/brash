@@ -13,7 +13,11 @@ void initVM(VM_Mode vmMode) {
 	vm.objects = NULL;
 	vm.mostRecentObject = NULL;
 	resetStack();
-	vm.lookup = make_variable_lookup();
+
+	vm.scopeLevel = 0;
+	for (size_t x = 0; x < STACK_MAX; x++) {
+		vm.variableTables[x] = make_variable_lookup();
+	}
 }
 
 void addObject(Object* object) {
@@ -34,6 +38,12 @@ void freeObjects() {
 		object = next;
 	}
 }
+void freeVM() {
+	freeObjects();
+	for (size_t x = 0; x < STACK_MAX; x++) {
+		free_variable_lookup(vm.variableTables[x]);
+	}
+}
 
 void push(Value value){
 	*vm.stackTop = value;
@@ -43,6 +53,7 @@ Value pop(){
 	vm.stackTop--;
 	return *vm.stackTop;
 }
+VariableLookup* _currentVariableLookup() { return vm.variableTables[vm.scopeLevel]; }
 
 #include <stdlib.h>
 #include <string.h>
@@ -77,27 +88,61 @@ InterpretResult run() {
 					push(valstring);
 				} break;
 
+			case OP_ENTER_SCOPE: {
+					vm.scopeLevel++;
+				} break;
+			case OP_EXIT_SCOPE: {
+					if (vm.scopeLevel == 0) {
+						fprintf(stderr, "Error: cannot exit top-level scope");
+						exit(EXIT_FAILURE);
+					}
+					free_variable_lookup(_currentVariableLookup());
+					vm.variableTables[vm.scopeLevel] = make_variable_lookup();
+					vm.scopeLevel--;
+				} break;
+			case OP_JUMP_IF_FALSE: {
+					Value val = pop();
+					if (!val.as.boolean) {
+						//Note: jump distances are a relative jump from the jump instruction
+						int16_t jumpDistance = readInt16FromBytes(vm.ip);
+						vm.ip += jumpDistance - 1;
+					}
+					else
+						vm.ip += 2;
+				} break;
 			case OP_SET_VARIABLE: {
 					char* variableName = (char*) vm.ip;
 					Value val = pop();
 					printDebug(stdout, VM_READING_INSTRUCTIONS, " '%s'", variableName);
+					lookup_add(_currentVariableLookup(), variableName, val);
 					vm.ip += strlen(variableName) + 1;
-					//TODO: set variable value
-					lookup_add(vm.lookup, variableName, val);
 				} break;
+
 			case OP_GET_VARIABLE: {
 					char* variableName = (char*) vm.ip;
 					printDebug(stdout, VM_READING_INSTRUCTIONS, " '%s'", variableName);
+
+					//Search to see if the variable is defined, starting from the current scope -> top level scope
+					size_t searchLevel = vm.scopeLevel;
+					bool found = false;
+					while (!found) {
+						found = lookup_has(vm.variableTables[searchLevel], variableName);
+						if (!found && vm.scopeLevel == 0) {
+							fprintf(stderr, "ERR: Variable is not defined.\n");
+							return INTERPRET_RUNTIME_ERROR;
+						}
+						else if (!found) {
+							searchLevel--;
+						}
+						else {
+							push(lookup_get(vm.variableTables[searchLevel], variableName));
+							break;
+						}
+					}
 					vm.ip += strlen(variableName) + 1;
-					//TODO: get variable value
-					if (lookup_has(vm.lookup, variableName)) {
-						push(lookup_get(vm.lookup, variableName));
-					}
-					else {
-						fprintf(stdout, "ERR: Variable is not defined.\n");
-						return INTERPRET_RUNTIME_ERROR;
-					}
 				} break;
+
+
 #define VAL_AS_STRING(val) (((ObjectString*) val.as.object)->cstr)
 			case OP_POP: {
 					Value val = pop();

@@ -345,6 +345,7 @@ void statement() {
 	else {
 		expressionStatement();
 	}
+	while (match(TK_NEWLINE)) {} //Consume any newlines
 }
 void variableDeclaration() {
 	consumeIf(TK_IDENTIFIER, "Expected variable name.");
