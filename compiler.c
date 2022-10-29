@@ -332,7 +332,16 @@ void statement() {
 
 		size_t jumpOffset = emitJump(OP_JUMP_IF_FALSE);
 		statement();
-		patchJump(jumpOffset);
+
+		if (match(TK_ELSE)) {
+			size_t elseOffset = emitJump(OP_JUMP);
+			patchJump(jumpOffset);
+			statement();
+			patchJump(elseOffset);
+		}
+		else {
+			patchJump(jumpOffset);
+		}
 	}
 
 	else if (match(TK_PRINT)) { //Print statement

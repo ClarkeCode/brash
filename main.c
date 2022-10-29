@@ -13,9 +13,10 @@
 
 typedef struct {
 	bool modeRepl;
-	bool modeInterpret;
+	bool modeLexing;
 	bool modeCompilation;
 	bool modeDisassembly;
+	bool modeInterpret;
 
 	bool behaviourSilent;
 
@@ -29,6 +30,13 @@ int main(int argc, char* argv[]) {
 		argc--; argv++;
 		if (argc == 0) pinput.modeRepl = true;
 		while (argc > 0) {
+			if (argv[0] && strcmp(argv[0], "-l") == 0) {
+				argc--; argv++;
+				if (argc == 0) break; //no file specified
+				pinput.modeLexing = true;
+				pinput.infile = argv[0];
+				argc--; argv++;
+			}
 			if (argv[0] && strcmp(argv[0], "-c") == 0) {
 				argc--; argv++;
 				if (argc == 0) break; //no file specified
@@ -53,7 +61,7 @@ int main(int argc, char* argv[]) {
 				argc--; argv++;
 				pinput.behaviourSilent = true;
 			}
-			else {
+			if (argv[0]) {
 				pinput.modeInterpret = true;
 				pinput.infile = argv[0];
 				argc--; argv++;
@@ -66,6 +74,18 @@ int main(int argc, char* argv[]) {
 //	else
 //		setDebugFlags(LEX_TOKEN_PRODUCTION | COM_BYTE_EMISSION | VM_READING_INSTRUCTIONS | VM_STACK_TRACE | COM_CHUNK_DISASSEMBLY);
 
+	if (pinput.modeLexing) {
+		if (!pinput.infile) return EXIT_FAILURE;
+		char* source = readFile(pinput.infile);
+		setLexer(pinput.infile, source);
+		Token tk;
+		do {
+ 			tk = produceNextToken();
+			char* content = unbox(&tk.content);
+			fprintf(stdout, "%-20s (%s:%d:%d) '%s'\n", getStr_token_t(tk.type), tk.location.file, tk.location.line, tk.location.offset, content);
+			free(content);
+		} while (tk.type != TK_EOF);
+	}
 	if (pinput.modeCompilation) { //Compile
 		char* srcfile = pinput.infile;
 		char* source = readFile(srcfile);

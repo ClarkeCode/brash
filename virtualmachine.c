@@ -100,6 +100,12 @@ InterpretResult run() {
 					vm.variableTables[vm.scopeLevel] = make_variable_lookup();
 					vm.scopeLevel--;
 				} break;
+
+			case OP_JUMP: {
+					//Note: jump distances are a relative jump from the jump instruction
+					int16_t jumpDistance = readInt16FromBytes(vm.ip);
+					vm.ip += jumpDistance - 1;
+				} break;
 			case OP_JUMP_IF_FALSE: {
 					Value val = pop();
 					if (!val.as.boolean) {
