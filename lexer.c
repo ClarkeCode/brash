@@ -113,6 +113,7 @@ token_t _produceNextToken(StrView* content, Location* loc) {
 	RET_IF_MATCH("if",    TK_IF);
 	RET_IF_MATCH("else",  TK_ELSE);
 	RET_IF_MATCH("print", TK_PRINT);
+	RET_IF_MATCH("while", TK_WHILE);
 
 
 	RET_IF_MATCH("+", TK_ADD)

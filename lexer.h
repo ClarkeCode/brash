@@ -9,6 +9,7 @@ typedef enum {
 	TK_IF,
 	TK_ELSE,
 	TK_PRINT,
+	TK_WHILE,
 
 	TK_STRING,
 	TK_NUMBER,

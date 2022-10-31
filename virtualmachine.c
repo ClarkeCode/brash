@@ -53,14 +53,15 @@ Value pop(){
 	vm.stackTop--;
 	return *vm.stackTop;
 }
-VariableLookup* _currentVariableLookup() { return vm.variableTables[vm.scopeLevel]; }
+VariableLookup* _variableLookupAtDepth(size_t depth) { return vm.variableTables[depth]; }
+VariableLookup* _currentVariableLookup() { return _variableLookupAtDepth(vm.scopeLevel); }
 
 #include <stdlib.h>
 #include <string.h>
 InterpretResult run() {
 #define READ_BYTE() (*vm.ip++)
 	while (true) {
-		byte_t instruction = READ_BYTE();
+		OpCode instruction = (OpCode) READ_BYTE(); //cast from byte_t
 		printDebug(stdout, VM_READING_INSTRUCTIONS, "[VM] Reading instruction '%s'", getStr_OpCode(instruction));
 		switch (instruction) {
 			case OP_NUMBER: {
@@ -101,6 +102,11 @@ InterpretResult run() {
 					vm.scopeLevel--;
 				} break;
 
+			case OP_LOOP: {
+					//Note: jump distances are a relative jump from the jump instruction
+					int16_t jumpDistance = readInt16FromBytes(vm.ip);
+					vm.ip -= (jumpDistance + 1);
+				} break;
 			case OP_JUMP: {
 					//Note: jump distances are a relative jump from the jump instruction
 					int16_t jumpDistance = readInt16FromBytes(vm.ip);
@@ -120,7 +126,26 @@ InterpretResult run() {
 					char* variableName = (char*) vm.ip;
 					Value val = pop();
 					printDebug(stdout, VM_READING_INSTRUCTIONS, " '%s'", variableName);
-					lookup_add(_currentVariableLookup(), variableName, val);
+
+					VariableLookup* lookup = NULL;
+
+					//If we are assigning to a variable which was declared before the current scope, overwrite that value; do not make a new local variable
+					if (vm.scopeLevel > 0) {
+						size_t searchLevel = vm.scopeLevel - 1;
+						while (lookup == NULL) {
+							if (lookup_has(_variableLookupAtDepth(searchLevel), variableName)) {
+								lookup = _variableLookupAtDepth(searchLevel);
+							}
+
+							if (searchLevel == 0 && lookup == NULL) {
+								lookup = _currentVariableLookup();
+							}
+							searchLevel--;
+						}
+					}
+					if (!lookup) lookup = _currentVariableLookup();
+
+					lookup_add(lookup, variableName, val);
 					vm.ip += strlen(variableName) + 1;
 				} break;
 
@@ -278,12 +303,14 @@ InterpretResult run() {
 					printDebug(stdout, VM_READING_INSTRUCTIONS, "\n");
 					return INTERPRET_OK;
 				} break;
+			default:
+				fprintf(stderr, "Unknown OpCode: '%d'\n", instruction);
+				break;
 		}
 		printDebug(stdout, VM_READING_INSTRUCTIONS, "\n");
 	}
-	//TODO: implement
-	return INTERPRET_OK;
 
+	return INTERPRET_OK;
 #undef READ_BYTE
 }
 

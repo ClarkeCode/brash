@@ -101,6 +101,12 @@ size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 			fprintf(outfile, "%+d (goto: %d)\n", jumpRelative, offset + jumpRelative);
 			return offset + 3;
 			} break;
+		case OP_LOOP: {
+			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
+			int16_t jumpRelative = readInt16FromBytes(chunk->code + offset + 1);
+			fprintf(outfile, "%+d (goto: %d)\n", jumpRelative, offset - jumpRelative);
+			return offset + 3;
+			} break;
 
 		default:
 			fprintf(outfile, "Unknown opcode %d '%c'\n", instruction, instruction);

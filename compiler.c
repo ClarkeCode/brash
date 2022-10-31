@@ -109,6 +109,19 @@ void patchJump(size_t jumpOffset) {
 	transpose2Bytes(&bundledNumber, currentChunk()->code + jumpOffset + 1);
 }
 
+void emitLoop(size_t loopStart) {
+	size_t currentOffset = currentChunk()->size;
+	emitByte(OP_LOOP);
+	if ((currentOffset-loopStart) > INT16_MAX) {
+		fprintf(stderr, "Cannot jump; too many instructions.");
+		exit(EXIT_FAILURE);
+	}
+
+	int16_t toBundle = currentOffset - loopStart;
+	emitBytes(0xff, 0xff); //Dummy bytes
+	transpose2Bytes(&toBundle, currentChunk()->code + currentChunk()->size - 2); //Patch the values with the right values in proper endian-ness
+}
+
 
 
 
@@ -342,6 +355,17 @@ void statement() {
 		else {
 			patchJump(jumpOffset);
 		}
+	}
+
+	else if (match(TK_WHILE)) { //While statement
+		size_t loopStart = currentChunk()->size;
+		expression();
+
+		size_t exitJump = emitJump(OP_JUMP_IF_FALSE);
+		statement();
+
+		emitLoop(loopStart);
+		patchJump(exitJump);
 	}
 
 	else if (match(TK_PRINT)) { //Print statement
