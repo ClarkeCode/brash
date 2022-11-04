@@ -1,6 +1,7 @@
 #!/bin/bash
 COMPDIR="compilation/"
 TERPDIR="interpretation/"
+LEXRDIR="tokenization/"
 sources=$(ls *.brash)
 
 function compTest() {
@@ -18,10 +19,11 @@ function compTest() {
 	fi
 }
 
-function terpTest() {
+function outputTest() {
 	src="$1"
-	actual=$TERPDIR$(echo $src | sed 's/.brash$/.output/')
-	expected=$TERPDIR$(echo $src | sed 's/.brash$/.expected/')
+	dir="$2"
+	actual=$dir$(echo $src | sed 's/.brash$/.output/')
+	expected=$dir$(echo $src | sed 's/.brash$/.expected/')
 
 	./brash $src -s > $actual
 
@@ -33,6 +35,11 @@ function terpTest() {
 	fi
 }
 
+echo "=== TOKENIZATION TESTS ==="
+for x in $sources; do
+	outputTest $x $LEXRDIR
+done
+echo
 
 echo "=== COMPILATION TESTS ==="
 for x in $sources; do
@@ -42,5 +49,5 @@ echo
 
 echo "=== INTERPRETATION TESTS ==="
 for x in $sources; do
-	terpTest $x
+	outputTest $x $TERPDIR
 done

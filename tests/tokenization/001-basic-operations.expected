@@ -1,0 +1,29 @@
+true
+false
+Logical AND
+true
+false
+false
+false
+Logical OR
+true
+true
+true
+false
+Logical XOR
+false
+true
+true
+false
+Arithmetic Operations
+1.000000
+1.220000
+-1.000000
+2.000000
+1.000000
+3.000000
+2.333333
+1.300000
+Strings
+Hello
+Bugs Bunny
