@@ -21,11 +21,12 @@ function compTest() {
 
 function outputTest() {
 	src="$1"
-	dir="$2"
+	flag="$2"
+	dir="$3"
 	actual=$dir$(echo $src | sed 's/.brash$/.output/')
 	expected=$dir$(echo $src | sed 's/.brash$/.expected/')
 
-	./brash $src -s > $actual
+	./brash "$flag" $src > $actual
 
 	if [[ -e $expected ]]; then
 		cmp -s $actual $expected && printf "%-10s %s\n" "[PASS]" $src || printf "%-10s %s\n" "[FAIL]" $src
@@ -37,7 +38,7 @@ function outputTest() {
 
 echo "=== TOKENIZATION TESTS ==="
 for x in $sources; do
-	outputTest $x $LEXRDIR
+	outputTest $x "-s -l" $LEXRDIR
 done
 echo
 
@@ -49,5 +50,5 @@ echo
 
 echo "=== INTERPRETATION TESTS ==="
 for x in $sources; do
-	outputTest $x $TERPDIR
+	outputTest $x "-s" $TERPDIR
 done
