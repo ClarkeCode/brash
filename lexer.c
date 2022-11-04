@@ -116,32 +116,32 @@ token_t _produceNextToken(StrView* content, Location* loc) {
 	RET_IF_MATCH("while", TK_WHILE);
 
 
-	RET_IF_MATCH("+", TK_ADD)
-	RET_IF_MATCH("-", TK_SUB)
-	RET_IF_MATCH("*", TK_MULTIPLY)
-	RET_IF_MATCH("/", TK_DIVIDE)
-	RET_IF_MATCH("%", TK_MODULO)
+	RET_IF_MATCH("+", TK_ADD);
+	RET_IF_MATCH("-", TK_SUB);
+	RET_IF_MATCH("*", TK_MULTIPLY);
+	RET_IF_MATCH("/", TK_DIVIDE);
+	RET_IF_MATCH("%", TK_MODULO);
 
-	RET_IF_MATCH("(", TK_PAREN_OPEN)
-	RET_IF_MATCH(")", TK_PAREN_CLOSE)
-	RET_IF_MATCH("{", TK_BRACE_OPEN)
-	RET_IF_MATCH("}", TK_BRACE_CLOSE)
+	RET_IF_MATCH("(", TK_PAREN_OPEN);
+	RET_IF_MATCH(")", TK_PAREN_CLOSE);
+	RET_IF_MATCH("{", TK_BRACE_OPEN);
+	RET_IF_MATCH("}", TK_BRACE_CLOSE);
 
-	RET_IF_MATCH("&&",    TK_AND)
-	RET_IF_MATCH("||",    TK_OR)
-	RET_IF_MATCH("^^",    TK_XOR)
-	RET_IF_MATCH("true",  TK_BOOLEAN)
-	RET_IF_MATCH("false", TK_BOOLEAN)
+	RET_IF_MATCH("&&",    TK_AND);
+	RET_IF_MATCH("||",    TK_OR);
+	RET_IF_MATCH("^^",    TK_XOR);
+	RET_IF_MATCH("true",  TK_BOOLEAN);
+	RET_IF_MATCH("false", TK_BOOLEAN);
 
 	//Operators or keywords with potential overlaps
-	RET_IF_MATCH("==", TK_EQUALITY)
-	RET_IF_MATCH("!=", TK_INEQUALITY)
-	RET_IF_MATCH("!",  TK_NOT)
-	RET_IF_MATCH("=",  TK_ASSIGNMENT)
-	RET_IF_MATCH("<=", TK_LESSER_EQUAL)
-	RET_IF_MATCH(">=", TK_GREATER_EQUAL)
-	RET_IF_MATCH("<",  TK_LESSER)
-	RET_IF_MATCH(">",  TK_GREATER)
+	RET_IF_MATCH("==", TK_EQUALITY);
+	RET_IF_MATCH("!=", TK_INEQUALITY);
+	RET_IF_MATCH("!",  TK_NOT);
+	RET_IF_MATCH("=",  TK_ASSIGNMENT);
+	RET_IF_MATCH("<=", TK_LESSER_EQUAL);
+	RET_IF_MATCH(">=", TK_GREATER_EQUAL);
+	RET_IF_MATCH("<",  TK_LESSER);
+	RET_IF_MATCH(">",  TK_GREATER);
 
 	if (char_in(currentChar(), VALID_IDENTIFIER_CHAR)) {
 		while (currentChar() != '\0' && char_in(currentChar(), VALID_IDENTIFIER_CHAR)) {
@@ -171,4 +171,50 @@ Token produceNextToken() {
 	nextToken.type = _produceNextToken(&nextToken.content, &nextToken.location);
 	printDebug(stdout, LEX_TOKEN_PRODUCTION, "[LEX] produceNextToken: %s\n", getStr_token_t(nextToken.type));
 	return nextToken;
+}
+
+
+
+typedef struct {
+	char* start;
+	char* current;
+	Location location;
+} LexerState;
+
+LexerState getLexerState() {
+	LexerState state = {0};
+	state.start = lexer.start;
+	state.current = lexer.current;
+	state.location = lexer.location;
+	return state;
+}
+void setLexerState(LexerState state) {
+	lexer.start = state.start;
+	lexer.current = state.current;
+	lexer.location = state.location;
+}
+
+
+bool isAssignmentStatement() {
+	LexerState state = getLexerState();
+	bool hasAssignment = false;
+
+	//Keep producing tokens until you find an assignment (true) or a terminator (false);
+	while (true) {
+		Token tk = produceNextToken();
+		if (tk.type == TK_ASSIGNMENT) {
+			hasAssignment = true;
+			break;
+		}
+		if (tk.type == TK_EOF ||
+				tk.type == TK_NEWLINE ||
+				tk.type == TK_SEMICOLON ||
+				tk.type == TK_BRACE_OPEN ||
+				tk.type == TK_BRACE_CLOSE) {
+			hasAssignment = false;
+			break;
+		}
+	}
+	setLexerState(state);
+	return hasAssignment;
 }

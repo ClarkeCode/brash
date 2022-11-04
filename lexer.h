@@ -65,4 +65,6 @@ typedef struct {
 
 void setLexer(char* filename, char* program);
 Token produceNextToken();
+
+bool isAssignmentStatement();
 #endif
