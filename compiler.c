@@ -198,6 +198,7 @@ void parsePrecedence(Precedence precedence);
 void expression();
 void statement();
 void block();
+void variableAssignment();
 
 void number(bool canAssign) {
 	char* numstring = unbox(&parser.previous.content);
@@ -380,17 +381,30 @@ void statement() {
 	}
 	while (match(TK_NEWLINE)) {} //Consume any newlines
 }
-void variableDeclaration() {
-	consumeIf(TK_IDENTIFIER, "Expected variable name.");
-	char* identString = unbox(&parser.previous.content);
 
-	if (match(TK_ASSIGNMENT)) {
-		expression();
-	}
+void variableAssignment() {
+	char* identString = unbox(&parser.previous.content);
+	consumeIf(TK_ASSIGNMENT, "Requires assignment operator.");
+	expression();
+
 	token_t terminators[] = {TK_EOF, TK_NEWLINE, TK_SEMICOLON, TK_BRACE_OPEN};
 	consumeIfMultiple(terminators, 4, "Expected an expression terminator.");
 	emitByte(OP_SET_VARIABLE);
 	emitString(identString);
+
+	free(identString);
+}
+
+void variableDeclaration() {
+	consumeIf(TK_IDENTIFIER, "Expected variable name.");
+	char* identString = unbox(&parser.previous.content);
+	emitByte(OP_DEF_VARIABLE);
+	emitString(identString);
+
+	if (checkIf(TK_ASSIGNMENT)) {
+		variableAssignment();
+	}
+
 	free(identString);
 }
 void declaration() {
@@ -398,6 +412,9 @@ void declaration() {
 	if (match(TK_EOF)) return;
 	else if (match(TK_VAR)) {
 		variableDeclaration();
+	}
+	else if (match(TK_IDENTIFIER)) {
+		variableAssignment();
 	}
 	else
 		statement();

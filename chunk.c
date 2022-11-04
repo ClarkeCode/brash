@@ -77,6 +77,14 @@ size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 			free(strcontent);
 			return offset + 1 + length + 1;
 			} break;
+		case OP_DEF_VARIABLE: {
+			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
+			char* strcontent = makeStringFromBytes(chunk->code + offset + 1);
+			size_t lenth = strlen(strcontent);
+			fprintf(outfile, "'%s'\n", strcontent);
+			free(strcontent);
+			return offset + 1 + lenth + 1;
+			} break;
 		case OP_SET_VARIABLE: {
 			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
 			char* strcontent = makeStringFromBytes(chunk->code + offset + 1);

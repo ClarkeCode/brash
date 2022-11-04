@@ -122,6 +122,13 @@ InterpretResult run() {
 					else
 						vm.ip += 2;
 				} break;
+			case OP_DEF_VARIABLE: {
+					char* variableName = (char*) vm.ip;
+					printDebug(stdout, VM_READING_INSTRUCTIONS, " '%s'", variableName);
+					Value val = { VAL_NOT_VALUE, {0} };
+					lookup_add(_currentVariableLookup(), variableName, val);
+					vm.ip += strlen(variableName) + 1;
+				} break;
 			case OP_SET_VARIABLE: {
 					char* variableName = (char*) vm.ip;
 					Value val = pop();
