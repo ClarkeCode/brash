@@ -6,6 +6,10 @@ typedef enum {
 	TK_NEWLINE,
 	TK_SEMICOLON,
 	TK_VAR,
+	TK_IF,
+	TK_ELSE,
+	TK_PRINT,
+	TK_WHILE,
 
 	TK_STRING,
 	TK_NUMBER,
@@ -61,4 +65,6 @@ typedef struct {
 
 void setLexer(char* filename, char* program);
 Token produceNextToken();
+
+bool isAssignmentStatement();
 #endif

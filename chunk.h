@@ -32,6 +32,14 @@ typedef enum {
 	OP_SET_VARIABLE,
 	OP_GET_VARIABLE,
 	OP_POP,
+
+	OP_ENTER_SCOPE,
+	OP_EXIT_SCOPE,
+
+	OP_PRINT,
+	OP_JUMP,
+	OP_JUMP_IF_FALSE,
+	OP_LOOP,
 } OpCode;
 
 typedef struct {
@@ -44,4 +52,5 @@ void writeChunk(Chunk* chunk, byte_t byte, Location location);
 void freeChunk(Chunk* chunk);
 
 void disassembleChunk(Chunk* chunk, const char* name);
+void serializeChunk(Chunk* chunk, const char* filename);
 #endif

@@ -1,0 +1,15 @@
+var num = 25.6
+
+if (num > 20) {
+	print "True 1"
+}
+else {
+	print "False 1"
+}
+
+if num > 99 {
+	print "True 2"
+}
+else {
+	print "False 2"
+}

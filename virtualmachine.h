@@ -16,13 +16,14 @@ typedef struct {
 	Value stack[STACK_MAX];
 	Value* stackTop;
 
-	VariableLookup* lookup;
+	VariableLookup* variableTables[STACK_MAX]; //TODO: make dynamic
+	size_t scopeLevel;
 
 	Object* objects;
 	Object* mostRecentObject;
 	size_t allocatedBytes;
 } VM;
-#undef STACK_MAX
+//#undef STACK_MAX
 
 extern VM vm;
 
@@ -35,7 +36,7 @@ typedef enum {
 
 void initVM(VM_Mode vmMode);
 InterpretResult interpret(const char* source);
-void freeObjects();
+void freeVM();
 
 
 void push(Value value);
