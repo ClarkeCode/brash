@@ -4,9 +4,11 @@ CC = gcc -g -Wall -Wextra -Wno-unused-parameter
 COMPILERFLAGS = -c -D BRASH_ALLOW_DEBUG_OUTPUT
 LINKERFLAGS = -lm
 
-BUILDDIR := build
+TOOLDIR := tools/
+
+BUILDDIR := build/
 SRCS := $(wildcard *.c) 
-OBJS := $(SRCS:%.c=$(BUILDDIR)/%.o)
+OBJS := $(SRCS:%.c=$(BUILDDIR)%.o)
 
 MAKE = make --no-print-directory
 
@@ -23,14 +25,14 @@ build: $(SRCS)
 	@$(MAKE) $(FINAL_TARGET)
 
 generated:
-	./gen_enum_lookups.sh *.h > enum_lookups.c
-	./header_generator.sh enum_lookups.c ENUM_LOOKUPS > enum_lookups.h
+	$(TOOLDIR)gen_enum_lookups.sh *.h > enum_lookups.c
+	$(TOOLDIR)header_generator.sh enum_lookups.c ENUM_LOOKUPS > enum_lookups.h
 
 $(FINAL_TARGET): $(OBJS)
 	$(CC) $(OBJS) -o $@ $(LINKERFLAGS)
 	@cp $(FINAL_TARGET) tests
 
-$(BUILDDIR)/%.o: %.c
+$(BUILDDIR)%.o: %.c
 	$(CC) $(COMPILERFLAGS) $< -o $@
 
 clean:
