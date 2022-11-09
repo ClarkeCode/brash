@@ -4,6 +4,7 @@
 #include "compiler.h"
 #include "debugging.h"
 #include "enum_lookups.h"
+#include "typechecker.h"
 
 VM vm;
 
@@ -319,12 +320,6 @@ InterpretResult run() {
 
 	return INTERPRET_OK;
 #undef READ_BYTE
-}
-
-bool typecheck(Chunk* chunk) {
-	if (chunk->size == 0) return true; //This line just prevents warnings until implementation
-	//TODO: implement type checking
-	return true;
 }
 
 InterpretResult interpret(const char* source) {
