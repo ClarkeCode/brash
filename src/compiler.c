@@ -321,7 +321,103 @@ void parsePrecedence(Precedence precedence) {
 	}
 }
 
+void functionDefinition() {
+	emitByte(OP_DEC_FUNCTION);
 
+	advanceParser();
+	char* stringval = unbox(&parser.previous.content);
+	emitString(stringval);
+	free(stringval);
+
+	//Read parameters
+	Types paramTypes[255] = {0};
+	char* paramNames[255];
+	size_t arity = 0;
+	while (!checkIf(TK_BRACE_OPEN) && !checkIf(TK_PARAMETER_LIST_SEPARATOR)) {
+		if (parser.current.type >= TK_TYPE_NUMBER && parser.current.type <= TK_TYPE_CUSTOM) {
+			switch (parser.current.type) {
+				case TK_TYPE_NUMBER:
+					paramTypes[arity] = TYPE_NUMBER;
+					break;
+				case TK_TYPE_BOOLEAN:
+					paramTypes[arity] = TYPE_BOOLEAN;
+					break;
+				case TK_TYPE_STRING:
+					paramTypes[arity] = TYPE_STRING;
+					break;
+				case TK_TYPE_FUNCTION:
+				case TK_TYPE_CUSTOM:
+					break;
+				default:
+					break;
+			}
+		}
+		else {
+			//Problem!!
+		}
+
+		advanceParser();
+		if (checkIf(TK_IDENTIFIER)) {
+			paramNames[arity] = unbox(&parser.current.content);
+		}
+		else {
+			//Problem!!
+		}
+		arity++;
+		advanceParser();
+	}
+
+	//Read return types
+	Types returnTypes[255] = {0};
+	size_t rarity = 0;
+	if (checkIf(TK_PARAMETER_LIST_SEPARATOR)) {
+		advanceParser();
+		while (!checkIf(TK_BRACE_OPEN)) {
+			if (parser.current.type >= TK_TYPE_NUMBER && parser.current.type <= TK_TYPE_CUSTOM) {
+				switch (parser.current.type) {
+					case TK_TYPE_NUMBER:
+						returnTypes[rarity] = TYPE_NUMBER;
+						break;
+					case TK_TYPE_BOOLEAN:
+						returnTypes[rarity] = TYPE_BOOLEAN;
+						break;
+					case TK_TYPE_STRING:
+						returnTypes[rarity] = TYPE_STRING;
+						break;
+					case TK_TYPE_FUNCTION:
+					case TK_TYPE_CUSTOM:
+						break;
+					default:
+						break;
+				}
+			}
+			else {
+				//Problem!!
+			}
+			rarity++;
+			advanceParser();
+		}
+	}
+
+
+	//Emit information
+	emitByte((byte_t) arity);
+	for (size_t x = 0; x < arity; x++) {
+		emitByte((byte_t) paramTypes[x]);
+	}
+	for (size_t x = 0; x < arity; x++) {
+		emitString(paramNames[x]);
+		if (paramNames[x]) free(paramNames[x]);
+	}
+
+	emitByte((byte_t) rarity);
+	for (size_t x = 0; x < rarity; x++) {
+		emitByte((byte_t) returnTypes[x]);
+	}
+
+	consumeIf(TK_BRACE_OPEN, "Expected a block opening");
+	block();
+}
 
 void expression() { parsePrecedence(PREC_ASSIGNMENT); }
 void expressionStatement() {
@@ -372,6 +468,10 @@ void statement() {
 	else if (match(TK_PRINT)) { //Print statement
 		expression();
 		emitByte(OP_PRINT);
+	}
+
+	else if (match(TK_DEC_FUNCTION)) {
+		functionDefinition();
 	}
 
 	else if (match(TK_BRACE_OPEN))

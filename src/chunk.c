@@ -26,6 +26,8 @@ void freeChunk(Chunk* chunk) {
 	initChunk(chunk);
 }
 
+
+//TODO: Rework chunk disassembly to be pointer-based instead of repeatedly using offsets
 #include <string.h>
 #include "enum_lookups.h"
 #define outfile stdout
@@ -100,6 +102,55 @@ size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 			fprintf(outfile, "'%s'\n", strcontent);
 			free(strcontent);
 			return offset + 1 + lenth + 1;
+			} break;
+
+		case OP_DEC_FUNCTION: {
+			size_t instructionSize = 1;
+			fprintf(outfile, ONEBYTE_FMT , getStr_OpCode(instruction));
+			char* strcontent = makeStringFromBytes(chunk->code + offset + 1);
+			instructionSize += strlen(strcontent) + 1;
+			fprintf(outfile, "\n\tName: '%s' ", strcontent);
+			free(strcontent);
+
+			uint8_t arity = (uint8_t) chunk->code[offset + instructionSize];
+			instructionSize += 1;
+
+			Types paramTypes[255] = {0};
+			char* paramNames[255];
+
+			for (uint8_t x = 0; x < arity; x++) {
+				paramTypes[x] = (Types) chunk->code[offset + instructionSize];
+				instructionSize += 1;
+			}
+			for (uint8_t x = 0; x < arity; x++) {
+				char* paramName = makeStringFromBytes(chunk->code + offset + instructionSize);
+				paramNames[x] = paramName;
+				instructionSize += strlen(paramName) + 1;
+			}
+
+
+			uint8_t rarity = (uint8_t) chunk->code[offset + instructionSize];
+			instructionSize += 1;
+
+			Types returnTypes[255] = {0};
+			for (uint8_t x = 0; x < rarity; x++) {
+				returnTypes[x] = (Types) chunk->code[offset + instructionSize];
+				instructionSize += 1;
+			}
+
+
+			fprintf(outfile, "Parameters: %d ", arity);
+			fprintf(outfile, "Returns: %d\n", rarity);
+
+			for (uint8_t x = 0; x < arity; x++) {
+				fprintf(outfile, "\tParam #%d %s %s\n", x, getStr_Types(paramTypes[x]), paramNames[x]);
+				if (paramNames[x]) free(paramNames[x]);
+			}
+			for (uint8_t x = 0; x < rarity; x++) {
+				fprintf(outfile, "\tReturn #%d %s\n", x, getStr_Types(returnTypes[x]));
+			}
+
+			return offset + instructionSize;
 			} break;
 
 		case OP_JUMP:
