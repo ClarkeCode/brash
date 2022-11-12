@@ -153,6 +153,15 @@ size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 			return offset + instructionSize;
 			} break;
 
+		case OP_FUNCTION_CALL: {
+			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
+			char* strcontent = makeStringFromBytes(chunk->code + offset + 1);
+			size_t lenth = strlen(strcontent);
+			fprintf(outfile, "'%s'\n", strcontent);
+			free(strcontent);
+			return offset + 1 + lenth + 1;
+			} break;
+
 		case OP_JUMP:
 		case OP_JUMP_IF_FALSE: {
 			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));

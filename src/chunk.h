@@ -42,6 +42,7 @@ typedef enum {
 	OP_LOOP,
 
 	OP_DEC_FUNCTION,
+	OP_FUNCTION_CALL,
 } OpCode;
 
 typedef struct {

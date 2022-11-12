@@ -44,6 +44,47 @@ void errorAtCurrent(const char* message) { errorAt(&parser.current, message); }
 void errorAtPrevious(const char* message) { errorAt(&parser.previous, message); }
 
 
+
+//Function registry
+typedef struct {
+	char** strings;
+	size_t size;
+	size_t capacity;
+} RegisteredFunctions; //Unordered string set
+RegisteredFunctions rgFunc;
+
+bool isFuncRegistered(char* name) {
+	for (size_t x = 0; x < rgFunc.size; x++) {
+		if (strcmp(name, rgFunc.strings[x]) == 0)
+			return true;
+	}
+	return false;
+}
+void registerFunc(char* name) {
+	if (rgFunc.size >= rgFunc.capacity) {
+		rgFunc.capacity *= 2;
+		rgFunc.strings = realloc(rgFunc.strings, rgFunc.capacity * sizeof(char*));
+	}
+	rgFunc.strings[rgFunc.size] = malloc(strlen(name) + 1);
+	strcpy(rgFunc.strings[rgFunc.size], name);
+	rgFunc.size++;
+}
+void makeRegistry() {
+	rgFunc.size = 0;
+	rgFunc.capacity = 16;
+	rgFunc.strings = malloc(sizeof(char*) * rgFunc.capacity);
+}
+void freeRegistry() {
+	for (size_t x = 0; x < rgFunc.size; x++) {
+		if (rgFunc.strings[x]) free(rgFunc.strings[x]);
+	}
+	if (rgFunc.strings) free(rgFunc.strings);
+}
+
+
+
+
+
 bool checkIf(token_t type) { return parser.current.type == type; }
 void advanceParser() {
 	parser.previous = parser.current;
@@ -92,7 +133,10 @@ void emitString(char* string) {
 		emitByte((byte_t) string[x]);
 	}
 }
-void endCompiler() { emitReturn(); }
+void endCompiler() {
+	emitReturn();
+	freeRegistry();
+}
 size_t emitJump(byte_t byte) {
 	size_t offset = currentChunk()->size;
 	emitByte(byte);
@@ -325,9 +369,15 @@ void functionDefinition() {
 	emitByte(OP_DEC_FUNCTION);
 
 	advanceParser();
-	char* stringval = unbox(&parser.previous.content);
-	emitString(stringval);
-	free(stringval);
+	char* funcname = unbox(&parser.previous.content);
+	emitString(funcname);
+	if (!isFuncRegistered(funcname)) {
+		registerFunc(funcname);
+	}
+	else {
+		//Function redefinition?
+	}
+	free(funcname);
 
 	//Read parameters
 	Types paramTypes[255] = {0};
@@ -514,7 +564,15 @@ void declaration() {
 		variableDeclaration();
 	}
 	else if (match(TK_IDENTIFIER)) {
-		variableAssignment();
+		char* idenName = unbox(&parser.previous.content);
+		if (isFuncRegistered(idenName)) { //TODO: if the identifier is a defined function, then this is a function call
+			emitByte(OP_FUNCTION_CALL);
+			emitString(idenName);
+		}
+		else {
+			variableAssignment();
+		}
+		free(idenName);
 	}
 	else
 		statement();
@@ -523,9 +581,11 @@ void declaration() {
 
 
 
+
 bool compile(const char* source, Chunk* chunk) {
 	setLexer("notafile", (char*)source);
 	compilingChunk = chunk;
+	makeRegistry();
 	parser.hadError = false;
 	parser.panicMode = false;
 	advanceParser();
