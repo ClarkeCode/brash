@@ -1,5 +1,8 @@
-docs: precedence.tex
-	latex -output-format=pdf precedence.tex
+TARGET=precedence.tex
+
+docs: $(TARGET)
+	latex -output-format=pdf $(TARGET)
+	latex -output-format=pdf $(TARGET)
 
 clean:
-	rm -f *.aux *.dvi *.log *.out
+	rm -f *.aux *.dvi *.log *.out *.toc
