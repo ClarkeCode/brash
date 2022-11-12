@@ -1,7 +1,5 @@
 *.out
 *.o
-*.aux
-*.log
 brash
 
 enum_lookups.*
