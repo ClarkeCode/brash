@@ -186,10 +186,6 @@ size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 #undef outfile
 
 void disassembleChunk(Chunk* chunk, const char* name) {
-	if (name)
-		printf("== %s ==\n", name);
-	else
-		printf("== UNNAMED_CHUNK ==\n");
 	for (size_t offset = 0; offset < chunk->size;) {
 		offset = disassembleInstruction(chunk, offset);
 	}
