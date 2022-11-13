@@ -118,6 +118,7 @@ token_t _produceNextToken(StrView* content, Location* loc) {
 	RET_IF_MATCH(":",       TK_PARAMETER_LIST_SEPARATOR);
 	RET_IF_MATCH("Number",  TK_TYPE_NUMBER);
 	RET_IF_MATCH("Boolean", TK_TYPE_BOOLEAN);
+	RET_IF_MATCH("Bool",    TK_TYPE_BOOLEAN);
 	RET_IF_MATCH("String",  TK_TYPE_STRING);
 	RET_IF_MATCH("type",    TK_TYPE_CUSTOM);
 	RET_IF_MATCH("return",  TK_RETURN);
