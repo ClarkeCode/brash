@@ -27,21 +27,25 @@ void freeChunk(Chunk* chunk) {
 }
 
 
-//TODO: Rework chunk disassembly to be pointer-based instead of repeatedly using offsets
 #include <string.h>
 #include "enum_lookups.h"
 #define outfile stdout
 #define ONEBYTE_FMT "%-18s"
-#define PRINT_SINGLE_BYTE(op) fprintf(outfile, "%s\n", getStr_OpCode(op)); return offset + 1
-char* makeStringFromBytes(byte_t* bytes) {
-	size_t length = strlen((char*) bytes);
+
+//bytes acts as an outparam, moving the input pointer via double indirection
+char* makeStringFromBytes(byte_t** bytes) {
+	size_t length = strlen((char*) *bytes);
 	char* strcontent = malloc(sizeof(byte_t) * (length + 1));
-	strcpy(strcontent, (char*)bytes);
+	strcpy(strcontent, (char*)(*bytes));
+	(*bytes) += length + 1;
 	return strcontent;
 }
-size_t disassembleInstruction(Chunk* chunk, size_t offset) {
+
+byte_t* disassembleInstruction(byte_t* start, byte_t* current) {
+	size_t offset = current - start;
+	byte_t instruction = *current;
 	printf("%04d ", offset);
-	byte_t instruction = chunk->code[offset];
+	current += 1; //Consume instruction OpCode
 	switch (instruction) {
 		//Single-byte instructions
 		case OP_RETURN:
@@ -64,78 +68,81 @@ size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 		case OP_ENTER_SCOPE:
 		case OP_EXIT_SCOPE:
 		case OP_PRINT:
-			PRINT_SINGLE_BYTE(instruction);
+			fprintf(outfile, "%s\n", getStr_OpCode(instruction));
+			return current;
 
 		//Multi-byte instructions
 		case OP_NUMBER:
 			fprintf(outfile, ONEBYTE_FMT , getStr_OpCode(instruction));
-			fprintf(outfile, "%f\n", readDoubleFromBytes(chunk->code + (offset+1)));
-			return offset + 1 + 8;
-		case OP_STRING: {
-			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
-			char* strcontent = makeStringFromBytes(chunk->code + offset + 1);
-			size_t length = strlen(strcontent);
-			fprintf(outfile, "'%s'\n", strcontent);
-			free(strcontent);
-			return offset + 1 + length + 1;
-			} break;
-		case OP_DEF_VARIABLE: {
-			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
-			char* strcontent = makeStringFromBytes(chunk->code + offset + 1);
-			size_t lenth = strlen(strcontent);
-			fprintf(outfile, "'%s'\n", strcontent);
-			free(strcontent);
-			return offset + 1 + lenth + 1;
-			} break;
-		case OP_SET_VARIABLE: {
-			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
-			char* strcontent = makeStringFromBytes(chunk->code + offset + 1);
-			size_t lenth = strlen(strcontent);
-			fprintf(outfile, "'%s'\n", strcontent);
-			free(strcontent);
-			return offset + 1 + lenth + 1;
-			} break;
-		case OP_GET_VARIABLE: {
-			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
-			char* strcontent = makeStringFromBytes(chunk->code + offset + 1);
-			size_t lenth = strlen(strcontent);
-			fprintf(outfile, "'%s'\n", strcontent);
-			free(strcontent);
-			return offset + 1 + lenth + 1;
-			} break;
+			fprintf(outfile, "%f\n", readDoubleFromBytes(current));
+			return current + 8;
 
-		case OP_DEC_FUNCTION: {
-			size_t instructionSize = 1;
+		case OP_STRING:
 			fprintf(outfile, ONEBYTE_FMT , getStr_OpCode(instruction));
-			char* strcontent = makeStringFromBytes(chunk->code + offset + 1);
-			instructionSize += strlen(strcontent) + 1;
+			{
+			char* strcontent = makeStringFromBytes(&current);
+			fprintf(outfile, "'%s'\n", strcontent);
+			free(strcontent);
+			}
+			return current;
+
+		case OP_DEF_VARIABLE:
+			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
+			{
+			char* strcontent = makeStringFromBytes(&current);
+			fprintf(outfile, "'%s'\n", strcontent);
+			free(strcontent);
+			}
+			return current;
+
+		case OP_SET_VARIABLE:
+			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
+			{
+			char* strcontent = makeStringFromBytes(&current);
+			fprintf(outfile, "'%s'\n", strcontent);
+			free(strcontent);
+			}
+			return current;
+
+		case OP_GET_VARIABLE:
+			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
+			{
+			char* strcontent = makeStringFromBytes(&current);
+			fprintf(outfile, "'%s'\n", strcontent);
+			free(strcontent);
+			}
+			return current;
+
+		case OP_DEC_FUNCTION:
+			fprintf(outfile, ONEBYTE_FMT , getStr_OpCode(instruction));
+			{
+			char* strcontent = makeStringFromBytes(&current);
 			fprintf(outfile, "\n\tName: '%s' ", strcontent);
 			free(strcontent);
+			}
 
-			uint8_t arity = (uint8_t) chunk->code[offset + instructionSize];
-			instructionSize += 1;
-
+			//Parameters
+			uint8_t arity = (uint8_t) *current;
+			current += 1;
 			Types paramTypes[255] = {0};
 			char* paramNames[255];
 
 			for (uint8_t x = 0; x < arity; x++) {
-				paramTypes[x] = (Types) chunk->code[offset + instructionSize];
-				instructionSize += 1;
+				paramTypes[x] = (Types) *current;
+				current += 1;
 			}
 			for (uint8_t x = 0; x < arity; x++) {
-				char* paramName = makeStringFromBytes(chunk->code + offset + instructionSize);
+				char* paramName = makeStringFromBytes(&current);
 				paramNames[x] = paramName;
-				instructionSize += strlen(paramName) + 1;
 			}
 
-
-			uint8_t rarity = (uint8_t) chunk->code[offset + instructionSize];
-			instructionSize += 1;
-
+			//Returns
+			uint8_t rarity = (uint8_t) *current;
+			current += 1;
 			Types returnTypes[255] = {0};
 			for (uint8_t x = 0; x < rarity; x++) {
-				returnTypes[x] = (Types) chunk->code[offset + instructionSize];
-				instructionSize += 1;
+				returnTypes[x] = (Types) *current;
+				current += 1;
 			}
 
 
@@ -149,45 +156,46 @@ size_t disassembleInstruction(Chunk* chunk, size_t offset) {
 			for (uint8_t x = 0; x < rarity; x++) {
 				fprintf(outfile, "\tReturn #%d %s\n", x, getStr_Types(returnTypes[x]));
 			}
+			return current;
 
-			return offset + instructionSize;
-			} break;
-
-		case OP_FUNCTION_CALL: {
+		case OP_FUNCTION_CALL:
 			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
-			char* strcontent = makeStringFromBytes(chunk->code + offset + 1);
-			size_t lenth = strlen(strcontent);
+			{
+			char* strcontent = makeStringFromBytes(&current);
 			fprintf(outfile, "'%s'\n", strcontent);
 			free(strcontent);
-			return offset + 1 + lenth + 1;
-			} break;
+			}
+			return current;
 
 		case OP_JUMP:
-		case OP_JUMP_IF_FALSE: {
+		case OP_JUMP_IF_FALSE:
 			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
-			int16_t jumpRelative = readInt16FromBytes(chunk->code + offset + 1);
+			{
+			int16_t jumpRelative = readInt16FromBytes(current);
 			fprintf(outfile, "%+d (goto: %d)\n", jumpRelative, offset + jumpRelative);
-			return offset + 3;
-			} break;
-		case OP_LOOP: {
+			}
+			return current + 2;
+		case OP_LOOP:
 			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
-			int16_t jumpRelative = readInt16FromBytes(chunk->code + offset + 1);
+			{
+			int16_t jumpRelative = readInt16FromBytes(current);
 			fprintf(outfile, "%+d (goto: %d)\n", jumpRelative, offset - jumpRelative);
-			return offset + 3;
-			} break;
+			}
+			return current + 2;
 
 		default:
 			fprintf(outfile, "Unknown opcode %d '%c'\n", instruction, instruction);
-			return offset + 1;
+			return current;
 	}
 }
-#undef PRINT_SINGLE_BYTE
 #undef ONEBYTE_FMT
 #undef outfile
 
 void disassembleChunk(Chunk* chunk, const char* name) {
-	for (size_t offset = 0; offset < chunk->size;) {
-		offset = disassembleInstruction(chunk, offset);
+	byte_t* current = chunk->code;
+	byte_t* end = chunk->code + chunk->size;
+	while (current < end) {
+		current = disassembleInstruction(chunk->code, current);
 	}
 }
 void serializeChunk(Chunk* chunk, const char* filename) {
