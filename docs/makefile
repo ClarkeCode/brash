@@ -1,4 +1,4 @@
-TARGET=precedence.tex
+TARGET=brash-manual.tex
 
 docs: $(TARGET)
 	latex -output-format=pdf $(TARGET)
