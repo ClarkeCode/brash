@@ -6,7 +6,18 @@
 #include "enum_lookups.h"
 #include "typechecker.h"
 
+
 VM vm;
+
+void push_callstack(byte_t* resume_instruction) {
+	*(vm.callStack.top++) = resume_instruction;
+	vm.callStack.size++;
+}
+byte_t* pop_callstack() {
+	if (vm.callStack.top == vm.callStack.stack) { /* TODO: freak out! */ }
+	vm.callStack.size--;
+	return *(--vm.callStack.top);
+}
 
 void resetStack() { vm.stackTop = vm.stack; }
 void initVM(VM_Mode vmMode) {
@@ -15,10 +26,18 @@ void initVM(VM_Mode vmMode) {
 	vm.mostRecentObject = NULL;
 	resetStack();
 
+	//Variables
 	vm.scopeLevel = 0;
 	for (size_t x = 0; x < STACK_MAX; x++) {
 		vm.variableTables[x] = make_variable_lookup();
 	}
+
+	//Functions
+	vm.funcSize = 0;
+	vm.declaredFunctions = NULL;
+
+	vm.callStack.size = 0;
+	vm.callStack.top = vm.callStack.stack;
 }
 
 void addObject(Object* object) {
@@ -57,6 +76,8 @@ Value pop(){
 VariableLookup* _variableLookupAtDepth(size_t depth) { return vm.variableTables[depth]; }
 VariableLookup* _currentVariableLookup() { return _variableLookupAtDepth(vm.scopeLevel); }
 
+
+
 #include <stdlib.h>
 #include <string.h>
 InterpretResult run() {
@@ -65,6 +86,26 @@ InterpretResult run() {
 		OpCode instruction = (OpCode) READ_BYTE(); //cast from byte_t
 		printDebug(stdout, VM_READING_INSTRUCTIONS, "[VM] Reading instruction '%s'", getStr_OpCode(instruction));
 		switch (instruction) {
+			case OP_DEC_FUNCTION: {
+					vm.funcSize++;
+					vm.declaredFunctions = realloc(vm.declaredFunctions, vm.funcSize * sizeof(BrashFunc));
+					vm.ip = decodeFunc(vm.ip, vm.declaredFunctions + (vm.funcSize - 1));
+				} break;
+			case OP_FUNCTION_CALL: {
+					char* funcName = (char*) vm.ip;
+					//Get function by name
+					BrashFunc* calledFunc = vm.declaredFunctions;
+					while (strcmp(funcName, calledFunc->name) != 0) { calledFunc++; }
+
+					//Push resume location onto the callstack
+					vm.ip += strlen(funcName) + 1;
+					push_callstack(vm.ip);
+
+					//Bind arguments to parameters, then jump to function start
+					//TODO: bind arguments
+					vm.ip = calledFunc->functionStart;
+				} break;
+
 			case OP_NUMBER: {
 					Value constant = { VAL_NUMBER, {.number=(readDoubleFromBytes(vm.ip))} };
 					vm.ip += 8;
@@ -308,8 +349,13 @@ InterpretResult run() {
 				} break;
 
 			case OP_RETURN: {
-					printDebug(stdout, VM_READING_INSTRUCTIONS, "\n");
-					return INTERPRET_OK;
+					if (vm.callStack.size != 0) {
+						vm.ip = pop_callstack();
+					}
+					else {
+						printDebug(stdout, VM_READING_INSTRUCTIONS, "\n");
+						return INTERPRET_OK;
+					}
 				} break;
 			default:
 				fprintf(stderr, "Unknown OpCode: '%d'\n", instruction);

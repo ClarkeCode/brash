@@ -2,6 +2,7 @@
 #define BRASH_VM
 #include "chunk.h"
 #include "variablelookup.h"
+#include "bytecodeconsumers.h"
 
 typedef enum {
 	VM_MODE_STATIC,
@@ -9,6 +10,12 @@ typedef enum {
 } VM_Mode;
 
 #define STACK_MAX 512
+typedef struct {
+	byte_t* stack[STACK_MAX];
+	byte_t** top; //One-past the most recently added item, or equal to stack if size is 0
+	size_t size;
+} CallStack;
+
 typedef struct {
 	VM_Mode mode;
 	Chunk* chunk;
@@ -18,6 +25,11 @@ typedef struct {
 
 	VariableLookup* variableTables[STACK_MAX]; //TODO: make dynamic
 	size_t scopeLevel;
+
+	BrashFunc* declaredFunctions;
+	size_t funcSize;
+
+	CallStack callStack;
 
 	Object* objects;
 	Object* mostRecentObject;

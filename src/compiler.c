@@ -166,6 +166,11 @@ void emitLoop(size_t loopStart) {
 	transpose2Bytes(&toBundle, currentChunk()->code + currentChunk()->size - 2); //Patch the values with the right values in proper endian-ness
 }
 
+void patchGeneric(int16_t value, byte_t* patchLocation) {
+	int16_t holder = value;
+	transpose2Bytes(&holder, patchLocation);
+}
+
 
 
 
@@ -365,8 +370,14 @@ void parsePrecedence(Precedence precedence) {
 	}
 }
 
+
+
 void functionDefinition() {
 	emitByte(OP_DEC_FUNCTION);
+
+	//Backpatching like if-statements so that the interpreter can skip over the function body
+	size_t bodyStart = currentChunk()->size;
+	emitBytes(0xff, 0xff); //For backpatching
 
 	advanceParser();
 	char* funcname = unbox(&parser.previous.content);
@@ -380,8 +391,8 @@ void functionDefinition() {
 	free(funcname);
 
 	//Read parameters
-	Types paramTypes[255] = {0};
-	char* paramNames[255];
+	Types paramTypes[256] = {0};
+	char* paramNames[256];
 	size_t arity = 0;
 	while (!checkIf(TK_BRACE_OPEN) && !checkIf(TK_PARAMETER_LIST_SEPARATOR)) {
 		if (parser.current.type >= TK_TYPE_NUMBER && parser.current.type <= TK_TYPE_CUSTOM) {
@@ -418,7 +429,7 @@ void functionDefinition() {
 	}
 
 	//Read return types
-	Types returnTypes[255] = {0};
+	Types returnTypes[256] = {0};
 	size_t rarity = 0;
 	if (checkIf(TK_PARAMETER_LIST_SEPARATOR)) {
 		advanceParser();
@@ -465,8 +476,19 @@ void functionDefinition() {
 		emitByte((byte_t) returnTypes[x]);
 	}
 
+
 	consumeIf(TK_BRACE_OPEN, "Expected a block opening");
 	block();
+	emitReturn();
+
+	//Perfom backpatch
+	size_t bodyEnd = currentChunk()->size;
+	if ((bodyEnd - bodyStart) > INT16_MAX) {
+		fprintf(stderr, "Function body is too large!");
+		exit(EXIT_FAILURE);
+	}
+	int16_t bodyLength = (int16_t) (bodyEnd-bodyStart);
+	patchGeneric(bodyLength, currentChunk()->code + bodyStart);
 }
 
 void expression() { parsePrecedence(PREC_ASSIGNMENT); }
