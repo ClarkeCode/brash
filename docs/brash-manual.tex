@@ -218,6 +218,7 @@ When encoding strings into bytecode, they are encoded as null-terminated strings
 When encoding a function definition into bytecode, functions are encoded as follows:
 \begin{itemize}
 	\item One-byte Function Definition Opcode
+	\item Byte-length of function definition and function body: one 16-bit unsigned integer
 	\item Encoded String of the function's name (See \ref{ssec:stringencode})
 	\item Arity: one 8-bit unsigned integer
 	\item If function \href{https://en.wikipedia.org/wiki/Arity}{arity} is 0 the following sub-items are omitted, otherwise each sub-item repeats a number of times equal to arity
