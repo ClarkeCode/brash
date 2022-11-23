@@ -6,7 +6,7 @@
 byte_t* decodeFunc(byte_t* bytecode, BrashFunc* func) {
 	//if (*bytecode == OP_DEC_FUNCTION) bytecode++;
 	
-	int16_t bodyLength = readInt16FromBytes(bytecode);
+	uint16_t bodyLength = readUInt16FromBytes(bytecode);
 	func->afterBody = bytecode + bodyLength;
 	bytecode += 2;
 

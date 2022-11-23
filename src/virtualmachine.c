@@ -146,19 +146,19 @@ InterpretResult run() {
 
 			case OP_LOOP: {
 					//Note: jump distances are a relative jump from the jump instruction
-					int16_t jumpDistance = readInt16FromBytes(vm.ip);
+					uint16_t jumpDistance = readUInt16FromBytes(vm.ip);
 					vm.ip -= (jumpDistance + 1);
 				} break;
 			case OP_JUMP: {
 					//Note: jump distances are a relative jump from the jump instruction
-					int16_t jumpDistance = readInt16FromBytes(vm.ip);
+					uint16_t jumpDistance = readUInt16FromBytes(vm.ip);
 					vm.ip += jumpDistance - 1;
 				} break;
 			case OP_JUMP_IF_FALSE: {
 					Value val = pop();
 					if (!val.as.boolean) {
 						//Note: jump distances are a relative jump from the jump instruction
-						int16_t jumpDistance = readInt16FromBytes(vm.ip);
+						uint16_t jumpDistance = readUInt16FromBytes(vm.ip);
 						vm.ip += jumpDistance - 1;
 					}
 					else

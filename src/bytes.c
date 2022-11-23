@@ -60,8 +60,8 @@ void transpose2Bytes(void* sourceBuffer, void* outBuffer) {
 	}
 }
 //Assumes that the source buffer is the byte representation of a double in Big-Endian order
-int16_t readInt16FromBytes(void* sourceBuffer) {
-	int16_t numericVal = 0;
+uint16_t readUInt16FromBytes(void* sourceBuffer) {
+	uint16_t numericVal = 0;
 	transpose2Bytes(sourceBuffer, &numericVal);
 	return numericVal;
 }

@@ -121,14 +121,14 @@ byte_t* disassembleInstruction(byte_t* start, byte_t* current) {
 		case OP_JUMP_IF_FALSE:
 			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
 			{
-			int16_t jumpRelative = readInt16FromBytes(current);
+			uint16_t jumpRelative = readUInt16FromBytes(current);
 			fprintf(outfile, "%+d (goto: %d)\n", jumpRelative, offset + jumpRelative);
 			}
 			return current + 2;
 		case OP_LOOP:
 			fprintf(outfile, ONEBYTE_FMT, getStr_OpCode(instruction));
 			{
-			int16_t jumpRelative = readInt16FromBytes(current);
+			uint16_t jumpRelative = readUInt16FromBytes(current);
 			fprintf(outfile, "%+d (goto: %d)\n", jumpRelative, offset - jumpRelative);
 			}
 			return current + 2;
