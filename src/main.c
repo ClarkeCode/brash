@@ -16,6 +16,7 @@ typedef struct {
 	bool modeLexing;
 	bool modeCompilation;
 	bool modeDisassembly;
+	bool modeCompAndDisassemble;
 	bool modeInterpret;
 
 	bool behaviourSilent;
@@ -48,6 +49,13 @@ int main(int argc, char* argv[]) {
 				argc--; argv++;
 				if (argc == 0) break; //no file specified
 				pinput.outfile = argv[0];
+				argc--; argv++;
+			}
+			if (argv[0] && strcmp(argv[0], "-d") == 0) {
+				argc--; argv++;
+				if (argc == 0) break; //no file specified
+				pinput.modeCompAndDisassemble = true;
+				pinput.infile = argv[0];
 				argc--; argv++;
 			}
 			if (argv[0] && strcmp(argv[0], "-D") == 0) {
@@ -86,6 +94,7 @@ int main(int argc, char* argv[]) {
 			free(content);
 		} while (tk.type != TK_EOF);
 	}
+
 	if (pinput.modeCompilation) { //Compile
 		char* srcfile = pinput.infile;
 		char* source = readFile(srcfile);
@@ -111,6 +120,19 @@ int main(int argc, char* argv[]) {
 		disassembleChunk(&chunk, "");
 		free(content);
 		return EXIT_SUCCESS;
+	}
+
+	if (pinput.modeCompAndDisassemble) { //Compile and disassemble
+		char* srcfile = pinput.infile;
+		char* source = readFile(srcfile);
+
+		Chunk chunk;
+		initChunk(&chunk);
+		bool compSuccess = compile(source, &chunk);
+		disassembleChunk(&chunk, "");
+		freeChunk(&chunk);
+		free(source);
+		return (compSuccess ? EXIT_SUCCESS : EXIT_FAILURE);
 	}
 
 	initVM((pinput.modeRepl ? VM_MODE_INTERACTIVE : VM_MODE_STATIC));
@@ -140,5 +162,5 @@ int main(int argc, char* argv[]) {
 		return (result == INTERPRET_OK ? EXIT_SUCCESS : result);
 	}
 
-	return 0;
+	return EXIT_SUCCESS;
 }
