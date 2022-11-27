@@ -1,0 +1,170 @@
+"This program is an implementation of the Rule 110 cellular automaton"
+"As Rule 110 has been proven to be Turing-complete by Matthew Cook, implementing Rule 110 in Brash demonstrates that Brash is also Turing-complete"
+
+"Note: the current state of the program is very ugly and may be revisited later, but it is intended to show the current capabilities of the language"
+var cell19 = " "
+var cell18 = " "
+var cell17 = " "
+var cell16 = " "
+var cell15 = " "
+var cell14 = " "
+var cell13 = " "
+var cell12 = " "
+var cell11 = " "
+var cell10 = " "
+var cell09 = " "
+var cell08 = " "
+var cell07 = " "
+var cell06 = " "
+var cell05 = " "
+var cell04 = " "
+var cell03 = " "
+var cell02 = " "
+var cell01 = " "
+var cell00 = "*"
+
+var next19 = " "
+var next18 = " "
+var next17 = " "
+var next16 = " "
+var next15 = " "
+var next14 = " "
+var next13 = " "
+var next12 = " "
+var next11 = " "
+var next10 = " "
+var next09 = " "
+var next08 = " "
+var next07 = " "
+var next06 = " "
+var next05 = " "
+var next04 = " "
+var next03 = " "
+var next02 = " "
+var next01 = " "
+var next00 = "*"
+
+var rule = ""
+var lookup_r = ""
+
+
+func lookupRule {
+	if rule == "***" || rule == "*  " || rule == "   " {
+		lookup_r = " "
+	}
+	else {
+		lookup_r = "*"
+	}
+}
+
+func showCurrentGeneration {
+	print "|" + cell19 + cell18 + cell17 + cell16 + cell15 + cell14 + cell13 + cell12 + cell11 + cell10 + cell09 + cell08 + cell07 + cell06 + cell05 + cell04 + cell03 + cell02 + cell01 + cell00 + "|"
+}
+
+func computeNextGeneration {
+
+	rule = cell19 + cell18 + cell17 + ""
+	lookupRule
+	next18 = lookup_r + ""
+
+	rule = cell18 + cell17 + cell16 + ""
+	lookupRule
+	next17 = lookup_r + ""
+
+	rule = cell17 + cell16 + cell15 + ""
+	lookupRule
+	next16 = lookup_r + ""
+
+	rule = cell16 + cell15 + cell14 + ""
+	lookupRule
+	next15 = lookup_r + ""
+
+	rule = cell15 + cell14 + cell13 + ""
+	lookupRule
+	next14 = lookup_r + ""
+
+	rule = cell14 + cell13 + cell12 + ""
+	lookupRule
+	next13 = lookup_r + ""
+
+	rule = cell13 + cell12 + cell11 + ""
+	lookupRule
+	next12 = lookup_r + ""
+
+	rule = cell12 + cell11 + cell10 + ""
+	lookupRule
+	next11 = lookup_r + ""
+
+	rule = cell11 + cell10 + cell09 + ""
+	lookupRule
+	next10 = lookup_r + ""
+
+	rule = cell10 + cell09 + cell08 + ""
+	lookupRule
+	next09 = lookup_r + ""
+
+	rule = cell09 + cell08 + cell07 + ""
+	lookupRule
+	next08 = lookup_r + ""
+
+	rule = cell08 + cell07 + cell06 + ""
+	lookupRule
+	next07 = lookup_r + ""
+
+	rule = cell07 + cell06 + cell05 + ""
+	lookupRule
+	next06 = lookup_r + ""
+
+	rule = cell06 + cell05 + cell04 + ""
+	lookupRule
+	next05 = lookup_r + ""
+
+	rule = cell05 + cell04 + cell03 + ""
+	lookupRule
+	next04 = lookup_r + ""
+
+	rule = cell04 + cell03 + cell02 + ""
+	lookupRule
+	next03 = lookup_r + ""
+
+	rule = cell03 + cell02 + cell01 + ""
+	lookupRule
+	next02 = lookup_r + ""
+
+	rule = cell02 + cell01 + cell00 + ""
+	lookupRule
+	next01 = lookup_r + ""
+
+
+
+	cell19 = next19 + ""
+	cell18 = next18 + ""
+	cell17 = next17 + ""
+	cell16 = next16 + ""
+	cell15 = next15 + ""
+	cell14 = next14 + ""
+	cell13 = next13 + ""
+	cell12 = next12 + ""
+	cell11 = next11 + ""
+	cell10 = next10 + ""
+	cell09 = next09 + ""
+	cell08 = next08 + ""
+	cell07 = next07 + ""
+	cell06 = next06 + ""
+	cell05 = next05 + ""
+	cell04 = next04 + ""
+	cell03 = next03 + ""
+	cell02 = next02 + ""
+	cell01 = next01 + ""
+	cell00 = next00 + ""
+}
+
+
+print "Rule 110"
+var count = 0
+while count < 45 {
+	showCurrentGeneration 
+	computeNextGeneration
+	count = count + 1
+}
+print "Done"
