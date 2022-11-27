@@ -80,10 +80,64 @@ VariableLookup* _currentVariableLookup() { return _variableLookupAtDepth(vm.scop
 
 #include <stdlib.h>
 #include <string.h>
+#define READ_BYTE() ((OpCode) (*vm.ip++))
+void interpretValue(OpCode instruction) {
+	switch (instruction) {
+		case OP_NUMBER: {
+				Value constant = { VAL_NUMBER, {.number=(readDoubleFromBytes(vm.ip))} };
+				vm.ip += 8;
+
+				printDebug(stdout, VM_READING_INSTRUCTIONS, " <%s : %f>", getStr_value_t(constant.type), constant.as.number);
+				push(constant);
+			} break;
+		case OP_TRUE: {
+				Value val = { VAL_BOOLEAN, {.boolean=(true)} };
+				push(val);
+			} break;
+		case OP_FALSE: {
+				Value val = { VAL_BOOLEAN, {.boolean=(false)} };
+				push(val);
+			} break;
+		case OP_STRING: {
+				//TODO:
+				ObjectString* ostring = makeString((char*)vm.ip);
+				addObject((Object*) ostring);
+				Value valstring = { VAL_OBJECT, {.object=((Object*)ostring)} };
+				printDebug(stdout, VM_READING_INSTRUCTIONS, " <%s : %s>", getStr_obj_t(valstring.as.object->type), ostring->cstr);
+				vm.ip += ostring->len + 1;
+				push(valstring);
+			} break;
+		case OP_GET_VARIABLE: {
+				char* variableName = (char*) vm.ip;
+				printDebug(stdout, VM_READING_INSTRUCTIONS, " '%s'", variableName);
+
+				//Search to see if the variable is defined, starting from the current scope -> top level scope
+				size_t searchLevel = vm.scopeLevel;
+				bool found = false;
+				while (!found) {
+					found = lookup_has(vm.variableTables[searchLevel], variableName);
+					if (!found && vm.scopeLevel == 0) {
+						fprintf(stderr, "ERR: Variable is not defined.\n");
+						//return INTERPRET_RUNTIME_ERROR;
+					}
+					else if (!found) {
+						searchLevel--;
+					}
+					else {
+						push(lookup_get(vm.variableTables[searchLevel], variableName));
+						break;
+					}
+				}
+				vm.ip += strlen(variableName) + 1;
+			} break;
+		default:
+			break;
+	}
+}
+
 InterpretResult run() {
-#define READ_BYTE() (*vm.ip++)
 	while (true) {
-		OpCode instruction = (OpCode) READ_BYTE(); //cast from byte_t
+		OpCode instruction = READ_BYTE(); //cast from byte_t
 		printDebug(stdout, VM_READING_INSTRUCTIONS, "[VM] Reading instruction '%s'", getStr_OpCode(instruction));
 		switch (instruction) {
 			case OP_DEC_FUNCTION: {
@@ -102,34 +156,23 @@ InterpretResult run() {
 					push_callstack(vm.ip);
 
 					//Bind arguments to parameters, then jump to function start
-					//TODO: bind arguments
+					//TODO: handle variable arguments properly
+					VariableLookup* funcScope = make_variable_lookup();
+					vm.variableTables[vm.scopeLevel + 1] = funcScope;
+					for (size_t x = 0; x < calledFunc->arity; x++) {
+						interpretValue(READ_BYTE()); //Push x-th arg onto value stack
+						lookup_add(funcScope, calledFunc->paramNames[x], pop());
+					}
 					vm.ip = calledFunc->functionStart;
 				} break;
 
-			case OP_NUMBER: {
-					Value constant = { VAL_NUMBER, {.number=(readDoubleFromBytes(vm.ip))} };
-					vm.ip += 8;
-
-					printDebug(stdout, VM_READING_INSTRUCTIONS, " <%s : %f>", getStr_value_t(constant.type), constant.as.number);
-					push(constant);
-				} break;
-			case OP_TRUE: {
-					Value val = { VAL_BOOLEAN, {.boolean=(true)} };
-					push(val);
-				} break;
-			case OP_FALSE: {
-					Value val = { VAL_BOOLEAN, {.boolean=(false)} };
-					push(val);
-				} break;
-			case OP_STRING: {
-					//TODO:
-					ObjectString* ostring = makeString((char*)vm.ip);
-					addObject((Object*) ostring);
-					Value valstring = { VAL_OBJECT, {.object=((Object*)ostring)} };
-					printDebug(stdout, VM_READING_INSTRUCTIONS, " <%s : %s>", getStr_obj_t(valstring.as.object->type), ostring->cstr);
-					vm.ip += ostring->len + 1;
-					push(valstring);
-				} break;
+			case OP_NUMBER:
+			case OP_TRUE:
+			case OP_FALSE:
+			case OP_STRING:
+			case OP_GET_VARIABLE:
+				interpretValue(instruction);
+				break;
 
 			case OP_ENTER_SCOPE: {
 					vm.scopeLevel++;
@@ -144,26 +187,6 @@ InterpretResult run() {
 					vm.scopeLevel--;
 				} break;
 
-			case OP_LOOP: {
-					//Note: jump distances are a relative jump from the jump instruction
-					uint16_t jumpDistance = readUInt16FromBytes(vm.ip);
-					vm.ip -= (jumpDistance + 1);
-				} break;
-			case OP_JUMP: {
-					//Note: jump distances are a relative jump from the jump instruction
-					uint16_t jumpDistance = readUInt16FromBytes(vm.ip);
-					vm.ip += jumpDistance - 1;
-				} break;
-			case OP_JUMP_IF_FALSE: {
-					Value val = pop();
-					if (!val.as.boolean) {
-						//Note: jump distances are a relative jump from the jump instruction
-						uint16_t jumpDistance = readUInt16FromBytes(vm.ip);
-						vm.ip += jumpDistance - 1;
-					}
-					else
-						vm.ip += 2;
-				} break;
 			case OP_DEF_VARIABLE: {
 					char* variableName = (char*) vm.ip;
 					printDebug(stdout, VM_READING_INSTRUCTIONS, " '%s'", variableName);
@@ -198,30 +221,27 @@ InterpretResult run() {
 					vm.ip += strlen(variableName) + 1;
 				} break;
 
-			case OP_GET_VARIABLE: {
-					char* variableName = (char*) vm.ip;
-					printDebug(stdout, VM_READING_INSTRUCTIONS, " '%s'", variableName);
 
-					//Search to see if the variable is defined, starting from the current scope -> top level scope
-					size_t searchLevel = vm.scopeLevel;
-					bool found = false;
-					while (!found) {
-						found = lookup_has(vm.variableTables[searchLevel], variableName);
-						if (!found && vm.scopeLevel == 0) {
-							fprintf(stderr, "ERR: Variable is not defined.\n");
-							return INTERPRET_RUNTIME_ERROR;
-						}
-						else if (!found) {
-							searchLevel--;
-						}
-						else {
-							push(lookup_get(vm.variableTables[searchLevel], variableName));
-							break;
-						}
-					}
-					vm.ip += strlen(variableName) + 1;
+			case OP_LOOP: {
+					//Note: jump distances are a relative jump from the jump instruction
+					uint16_t jumpDistance = readUInt16FromBytes(vm.ip);
+					vm.ip -= (jumpDistance + 1);
 				} break;
-
+			case OP_JUMP: {
+					//Note: jump distances are a relative jump from the jump instruction
+					uint16_t jumpDistance = readUInt16FromBytes(vm.ip);
+					vm.ip += jumpDistance - 1;
+				} break;
+			case OP_JUMP_IF_FALSE: {
+					Value val = pop();
+					if (!val.as.boolean) {
+						//Note: jump distances are a relative jump from the jump instruction
+						uint16_t jumpDistance = readUInt16FromBytes(vm.ip);
+						vm.ip += jumpDistance - 1;
+					}
+					else
+						vm.ip += 2;
+				} break;
 
 #define VAL_AS_STRING(val) (((ObjectString*) val.as.object)->cstr)
 			case OP_POP: {
@@ -365,8 +385,8 @@ InterpretResult run() {
 	}
 
 	return INTERPRET_OK;
-#undef READ_BYTE
 }
+#undef READ_BYTE
 
 InterpretResult interpret(const char* source) {
 	Chunk chunk;

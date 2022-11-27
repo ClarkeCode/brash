@@ -587,7 +587,7 @@ void declaration() {
 	}
 	else if (match(TK_IDENTIFIER)) {
 		char* idenName = unbox(&parser.previous.content);
-		if (isFuncRegistered(idenName)) { //TODO: if the identifier is a defined function, then this is a function call
+		if (isFuncRegistered(idenName)) { //If the identifier is a defined function, then this is a function call
 			emitByte(OP_FUNCTION_CALL);
 			emitString(idenName);
 		}

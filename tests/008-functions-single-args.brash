@@ -1,0 +1,33 @@
+func numArgNoReturn Number n {
+	print "1An 0R"
+	print n
+}
+
+func boolArgNoReturn Boolean b {
+	if b {
+		print "We're true!"
+	}
+	else {
+		print "We're false!"
+	}
+}
+
+func boolArgNoReturn2 Bool b {
+	if b {
+		print "We're true, too!"
+	}
+	else {
+		print "We're false, too!"
+	}
+}
+
+func stringArgNoReturn String s {
+	print "1As 0R: " + s
+}
+
+numArgNoReturn 8.34
+boolArgNoReturn true
+boolArgNoReturn false
+boolArgNoReturn2 true
+boolArgNoReturn2 false
+stringArgNoReturn "Hello!"
