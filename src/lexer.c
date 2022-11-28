@@ -64,7 +64,17 @@ char* VALID_IDENTIFIER_CHAR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW
 token_t _produceNextToken(StrView* content, Location* loc) {
 	advance_whitespace(&lexer.current);
 	lexer.start = lexer.current;
+
+	while (currentChar() == '#' || (*lexer.current == '/' && *(lexer.current+1) == '/')) {
+		while (currentChar() != '\n') {
+			ADVANCE_LEXER(1);
+		}
+		ADVANCE_LEXER(1);
+		lexer.location.line++;
+		lexer.location.offset = 0;
+	}
 	*loc = lexer.location; //Copy by-value
+
 
 	if (atEnd()) {
 		SET_CONTENT("");
