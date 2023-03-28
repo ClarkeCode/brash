@@ -1,0 +1,237 @@
+\documentclass{article}
+\usepackage[colorlinks = true, urlcolor = blue, linkcolor = blue]{hyperref}
+\usepackage{multirow}
+\usepackage{listings}
+\usepackage{color}
+
+% Thank you Dave! https://www.davidpace.de/defining-custom-language-templates-for-latex-listings/
+\lstdefinelanguage{brash} {
+	morekeywords={
+		var,
+		if,
+		else,
+		while,
+		func,
+		print,
+		true,
+		false
+	},
+	sensitive=true, % keywords are case sensitive
+	morecomment=[l]{//},
+	%morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+	morestring=[b]" % defines that strings are enclosed in double quotes
+}
+
+\definecolor{darkGreen}{RGB}{63,127,95}
+\lstset{
+	frame=tb,
+	language=brash,
+	aboveskip=5mm,
+	belowskip=5mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=none,
+	numberstyle=\tiny\color{blue},
+	keywordstyle=\color{red},
+	commentstyle=\color{blue},
+	stringstyle=\color{darkGreen},
+	breaklines=true,
+	frame=trbl,
+	%frameround=tttt,
+	framesep=4pt,
+	breakatwhitespace=true,
+	tabsize=4
+}
+
+\title{Brash Reference Manual}
+\author{Robert Clarke}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\clearpage
+
+\section{A Foreword}
+\subsection{Motivations}
+\subsection{What Brash is}
+\subsection{What Brash isn't}
+
+\section{Introduction to Brash Syntax}
+
+\subsection{Basic Types}
+There are three basic types in Brash: \textbf{Number}, \textbf{Boolean}, and \textbf{String}.
+\begin{itemize}
+	\item Number values are base-10 double precision floating point numbers (Supports up to 6 decimal places)
+	\item Boolean values are either \textbf{true} or \textbf{false}
+	\item String values are series of textual characters that are enclosed by double-quotation marks
+\end{itemize}
+\begin{minipage}{\linewidth}
+\lstinputlisting[caption={Basic Types}]{snippets/basic-types.brash}
+\end{minipage}
+
+
+\subsection{Variables}
+To assign a name to a value, use variables for easy reference in your program.
+To declare a variable use the \textbf{var} keyword, followed by an identifier, an equals sign, and the value you wish to bind to the variable.
+After a variable is declared, you may reference the variable's value without restating the \textbf{var} keyword.
+\begin{minipage}{\linewidth}
+\lstinputlisting[caption={Variables}]{snippets/variables.brash}
+\end{minipage}
+
+\subsection{Expressions and Operators}
+An expression is a series of values and operators which evaluate to a single value.
+A majority of the operators in Brash are 'infix' operators which appear between values in the form "A OPERATOR B".
+However, there are some prefix operators which appear before the value they modify.
+\begin{itemize}
+	\item Special operators
+		\begin{itemize}
+			\item Assignment = The assignment operator binds the variable identifier of its left operand to the value of its right operand
+			\item Grouping () The grouping operators signal that the enclosed expression should be evaluated first
+		\end{itemize}
+
+	\item Arithmetic operators
+		\begin{itemize}
+			\item Addition +
+			\item Subtraction -
+			\item Multiplication *
+			\item Division /
+			\item Modulo \%
+			\item Negation - (prefix)
+		\end{itemize}
+
+	\item Comparative operators
+		\begin{itemize}
+			\item Lesser \textless
+			\item Lesser-Equals \textless=
+			\item Greater \textgreater
+			\item Greater-Equals \textgreater=
+		\end{itemize}
+
+	\item Identity operators
+		\begin{itemize}
+			\item Equality ==
+			\item Inequality !=
+		\end{itemize}
+
+	\item Logical operators
+		\begin{itemize}
+			\item Logical NOT ! (prefix)
+			\item Logical AND \&\&
+			\item Logical OR $||$
+			\item Logical XOR \^{}\^{}
+		\end{itemize}
+\end{itemize}
+
+\subsubsection{Operator Precedence}
+The order in which operators are evaluated are determined by their precedence.
+Higher precedence operators are evaluated before lower precedence operators.
+
+\begin{table}[!ht]
+\begin{center}
+	\caption{Precedence - High to Low}
+\begin{tabular}{|c|l|l|}
+	\hline
+	Operator & Operator Name & Associativity \\
+	\hline
+	$( )$              & Group               & None  \\
+	!                  & Logical NOT         & Right \\
+%	\~{}               & Bitwise Complement  & Right \\
+	-                  & Arithmetic Negation & Right \\
+
+	*                  & Multiplication      & Left \\
+	/                  & Division            & Left \\
+	\%                 & Modulo              & Left \\
+
+	+                  & Addition            & Left \\
+	-                  & Subtraction         & Left \\
+
+	\&\&               & Logical AND         & Left \\
+	$||$               & Logical OR          & Left \\
+	\^{}\^{}           & Logical XOR         & Left \\
+
+	\textless          & Lesser              & None \\
+	\textgreater       & Greater             & None \\
+	\textless=         & Lesser-equal        & None \\
+	\textgreater=      & Greater-equal       & None \\
+
+	==                 & Equality            & None \\
+	!=                 & Inequality          & None \\
+
+	=                  & Assignment          & Right \\
+	\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\clearpage
+
+\subsection{Control Flow}
+While you can make useful programs with the structures discussed so far, the magic really begins when your programs can take different actions based on certain conditions.
+
+The \textbf{if} keyword must be followed by an expression that evaluates to a boolean value.
+When the conditional expression is true, the statements within the if-block are executed.
+When the conditional expression is false, the if-block is skipped.
+\lstinputlisting[caption={If Statement}]{snippets/simple-if.brash}
+If you have prior experience in the C family of programming languages, you may prefer to enclose your conditions with brackets:
+\lstinputlisting[caption={If Statement (C-style)}]{snippets/simple-if-cstyle.brash}
+
+To execute instructions when an \textbf{if}'s conditional expression is false, follow the \textbf{if} block with an \textbf{else} block.
+\lstinputlisting[caption={If-Else}]{snippets/if-else.brash}
+
+\subsection{Loops}
+The \textbf{while} keyword is followed by an expression that evaluates to a boolean value.
+The loop body follows after the conditional expression.
+Once all the statements within the loop body have been executed, the conditional expression is re-evaluated.
+If the conditional expression is false, skip the loop body and resume execution at the next statement.
+\lstinputlisting[caption={While Loop}]{snippets/while-loop.brash}
+
+%\begin{lstlisting}
+%var myName = "Something"
+%print "Something" + "New"
+%if (20 > 10) {
+%	print "Greg"
+%}
+%\end{lstlisting}
+
+%\lstinputlisting[caption={Something New}]{test.brash}
+
+
+
+
+
+
+
+\clearpage
+\section{Bytecode Details}
+Brash code gets compiled to bytecode before interpretation. If stored as a standalone file it is called a Brash Object File, and \textbf{.bro} is the preferred file extension.
+
+\subsection{Numbers}
+When encoding numbers into bytecode, they are encoded as 8-byte double-precision floating point numbers. Byte order is Big-Endian a.k.a. \href{https://www.rfc-editor.org/rfc/rfc1700}{TCP/IP Network Order.}
+
+\subsection{Strings} \label{ssec:stringencode}
+When encoding strings into bytecode, they are encoded as null-terminated strings.
+
+\subsection{Functions}
+When encoding a function definition into bytecode, functions are encoded as follows:
+\begin{itemize}
+	\item One-byte Function Definition Opcode
+	\item Byte-length of function definition and function body: one 16-bit unsigned integer
+	\item Encoded String of the function's name (See \ref{ssec:stringencode})
+	\item Arity: one 8-bit unsigned integer
+	\item If function \href{https://en.wikipedia.org/wiki/Arity}{arity} is 0 the following sub-items are omitted, otherwise each sub-item repeats a number of times equal to arity
+		\begin{itemize}
+			\item Encoded Type of n-th parameter
+			\item Encoded String of the n-th parameter's name (See \ref{ssec:stringencode})
+		\end{itemize}
+	\item R-Arity (Return Arity): one 8-bit unsigned integer
+	\item If function r-arity is 0 the following sub-item is omitted, otherwise the sub-item repeats a number of times equal to r-arity
+		\begin{itemize}
+			\item Encoded Type of n-th returned item
+		\end{itemize}
+	\item Function body: continue compilation as normal
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,8 @@
+var name = "Greg"
+var age = 20
+age = age + 1
+var canDrive = true
+
+print name     //Displays 'Greg'
+print age      //Displays '21.000000'
+print canDrive //Displays 'true'

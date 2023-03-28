@@ -33,6 +33,6 @@ fi
 echo "//Generated file"
 for file in "$@"
 do
-	grep -q "typedef enum" $file && printf "#include \"%s\"\n" $file
+	grep -q "typedef enum" $file && printf "#include \"%s\"\n" $(echo $file | sed 's/src\///')
 	processFile $file
 done

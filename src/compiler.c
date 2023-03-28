@@ -44,6 +44,47 @@ void errorAtCurrent(const char* message) { errorAt(&parser.current, message); }
 void errorAtPrevious(const char* message) { errorAt(&parser.previous, message); }
 
 
+
+//Function registry
+typedef struct {
+	char** strings;
+	size_t size;
+	size_t capacity;
+} RegisteredFunctions; //Unordered string set
+RegisteredFunctions rgFunc;
+
+bool isFuncRegistered(char* name) {
+	for (size_t x = 0; x < rgFunc.size; x++) {
+		if (strcmp(name, rgFunc.strings[x]) == 0)
+			return true;
+	}
+	return false;
+}
+void registerFunc(char* name) {
+	if (rgFunc.size >= rgFunc.capacity) {
+		rgFunc.capacity *= 2;
+		rgFunc.strings = realloc(rgFunc.strings, rgFunc.capacity * sizeof(char*));
+	}
+	rgFunc.strings[rgFunc.size] = malloc(strlen(name) + 1);
+	strcpy(rgFunc.strings[rgFunc.size], name);
+	rgFunc.size++;
+}
+void makeRegistry() {
+	rgFunc.size = 0;
+	rgFunc.capacity = 16;
+	rgFunc.strings = malloc(sizeof(char*) * rgFunc.capacity);
+}
+void freeRegistry() {
+	for (size_t x = 0; x < rgFunc.size; x++) {
+		if (rgFunc.strings[x]) free(rgFunc.strings[x]);
+	}
+	if (rgFunc.strings) free(rgFunc.strings);
+}
+
+
+
+
+
 bool checkIf(token_t type) { return parser.current.type == type; }
 void advanceParser() {
 	parser.previous = parser.current;
@@ -92,7 +133,10 @@ void emitString(char* string) {
 		emitByte((byte_t) string[x]);
 	}
 }
-void endCompiler() { emitReturn(); }
+void endCompiler() {
+	emitReturn();
+	freeRegistry();
+}
 size_t emitJump(byte_t byte) {
 	size_t offset = currentChunk()->size;
 	emitByte(byte);
@@ -120,6 +164,11 @@ void emitLoop(size_t loopStart) {
 	int16_t toBundle = currentOffset - loopStart;
 	emitBytes(0xff, 0xff); //Dummy bytes
 	transpose2Bytes(&toBundle, currentChunk()->code + currentChunk()->size - 2); //Patch the values with the right values in proper endian-ness
+}
+
+void patchGeneric(int16_t value, byte_t* patchLocation) {
+	int16_t holder = value;
+	transpose2Bytes(&holder, patchLocation);
 }
 
 
@@ -323,6 +372,125 @@ void parsePrecedence(Precedence precedence) {
 
 
 
+void functionDefinition() {
+	emitByte(OP_DEC_FUNCTION);
+
+	//Backpatching like if-statements so that the interpreter can skip over the function body
+	size_t bodyStart = currentChunk()->size;
+	emitBytes(0xff, 0xff); //For backpatching
+
+	advanceParser();
+	char* funcname = unbox(&parser.previous.content);
+	emitString(funcname);
+	if (!isFuncRegistered(funcname)) {
+		registerFunc(funcname);
+	}
+	else {
+		//Function redefinition?
+	}
+	free(funcname);
+
+	//Read parameters
+	Types paramTypes[256] = {0};
+	char* paramNames[256];
+	size_t arity = 0;
+	while (!checkIf(TK_BRACE_OPEN) && !checkIf(TK_PARAMETER_LIST_SEPARATOR)) {
+		if (parser.current.type >= TK_TYPE_NUMBER && parser.current.type <= TK_TYPE_CUSTOM) {
+			switch (parser.current.type) {
+				case TK_TYPE_NUMBER:
+					paramTypes[arity] = TYPE_NUMBER;
+					break;
+				case TK_TYPE_BOOLEAN:
+					paramTypes[arity] = TYPE_BOOLEAN;
+					break;
+				case TK_TYPE_STRING:
+					paramTypes[arity] = TYPE_STRING;
+					break;
+				case TK_TYPE_FUNCTION:
+				case TK_TYPE_CUSTOM:
+					break;
+				default:
+					break;
+			}
+		}
+		else {
+			//Problem!!
+		}
+
+		advanceParser();
+		if (checkIf(TK_IDENTIFIER)) {
+			paramNames[arity] = unbox(&parser.current.content);
+		}
+		else {
+			//Problem!!
+		}
+		arity++;
+		advanceParser();
+	}
+
+	//Read return types
+	Types returnTypes[256] = {0};
+	size_t rarity = 0;
+	if (checkIf(TK_PARAMETER_LIST_SEPARATOR)) {
+		advanceParser();
+		while (!checkIf(TK_BRACE_OPEN)) {
+			if (parser.current.type >= TK_TYPE_NUMBER && parser.current.type <= TK_TYPE_CUSTOM) {
+				switch (parser.current.type) {
+					case TK_TYPE_NUMBER:
+						returnTypes[rarity] = TYPE_NUMBER;
+						break;
+					case TK_TYPE_BOOLEAN:
+						returnTypes[rarity] = TYPE_BOOLEAN;
+						break;
+					case TK_TYPE_STRING:
+						returnTypes[rarity] = TYPE_STRING;
+						break;
+					case TK_TYPE_FUNCTION:
+					case TK_TYPE_CUSTOM:
+						break;
+					default:
+						break;
+				}
+			}
+			else {
+				//Problem!!
+			}
+			rarity++;
+			advanceParser();
+		}
+	}
+
+
+	//Emit information
+	emitByte((byte_t) arity);
+	for (size_t x = 0; x < arity; x++) {
+		emitByte((byte_t) paramTypes[x]);
+	}
+	for (size_t x = 0; x < arity; x++) {
+		emitString(paramNames[x]);
+		if (paramNames[x]) free(paramNames[x]);
+	}
+
+	emitByte((byte_t) rarity);
+	for (size_t x = 0; x < rarity; x++) {
+		emitByte((byte_t) returnTypes[x]);
+	}
+
+
+	consumeIf(TK_BRACE_OPEN, "Expected a block opening");
+	block();
+	emitReturn();
+
+	//Perfom backpatch
+	size_t bodyEnd = currentChunk()->size;
+	if ((bodyEnd - bodyStart) > INT16_MAX) {
+		fprintf(stderr, "Function body is too large!");
+		exit(EXIT_FAILURE);
+	}
+	int16_t bodyLength = (int16_t) (bodyEnd-bodyStart);
+	patchGeneric(bodyLength, currentChunk()->code + bodyStart);
+}
+
 void expression() { parsePrecedence(PREC_ASSIGNMENT); }
 void expressionStatement() {
 	expression();
@@ -374,6 +542,10 @@ void statement() {
 		emitByte(OP_PRINT);
 	}
 
+	else if (match(TK_DEC_FUNCTION)) {
+		functionDefinition();
+	}
+
 	else if (match(TK_BRACE_OPEN))
 		block();
 	else {
@@ -414,7 +586,15 @@ void declaration() {
 		variableDeclaration();
 	}
 	else if (match(TK_IDENTIFIER)) {
-		variableAssignment();
+		char* idenName = unbox(&parser.previous.content);
+		if (isFuncRegistered(idenName)) { //If the identifier is a defined function, then this is a function call
+			emitByte(OP_FUNCTION_CALL);
+			emitString(idenName);
+		}
+		else {
+			variableAssignment();
+		}
+		free(idenName);
 	}
 	else
 		statement();
@@ -423,9 +603,11 @@ void declaration() {
 
 
 
+
 bool compile(const char* source, Chunk* chunk) {
 	setLexer("notafile", (char*)source);
 	compilingChunk = chunk;
+	makeRegistry();
 	parser.hadError = false;
 	parser.panicMode = false;
 	advanceParser();

@@ -1,0 +1,5 @@
+var waffles = 7
+if (waffles > 3) {
+	print "Thats's a lot of waffles!"
+}
+print "Enjoy your breakfast!"

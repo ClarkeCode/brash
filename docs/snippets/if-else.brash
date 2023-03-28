@@ -1,0 +1,8 @@
+var waffles = 2
+if (waffles > 3) {
+	print "Thats's a lot of waffles!"
+}
+else {
+	print "That's a sensible amount of waffles!"
+}
+print "Enjoy your breakfast!"

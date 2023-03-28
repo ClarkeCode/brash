@@ -1,0 +1,8 @@
+
+func noArgNoReturn {
+	print "Hello from inside the function body!"
+}
+
+print "Before function call"
+noArgNoReturn
+print "After function call :)"

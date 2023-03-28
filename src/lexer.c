@@ -4,7 +4,7 @@
 
 #include "lexer.h"
 
-
+//TODO: make lexer ignore comments
 
 
 void nSetView(StrView* strview, char* orig, size_t len) {
@@ -64,7 +64,17 @@ char* VALID_IDENTIFIER_CHAR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVW
 token_t _produceNextToken(StrView* content, Location* loc) {
 	advance_whitespace(&lexer.current);
 	lexer.start = lexer.current;
+
+	while (currentChar() == '#' || (*lexer.current == '/' && *(lexer.current+1) == '/')) {
+		while (currentChar() != '\n') {
+			ADVANCE_LEXER(1);
+		}
+		ADVANCE_LEXER(1);
+		lexer.location.line++;
+		lexer.location.offset = 0;
+	}
 	*loc = lexer.location; //Copy by-value
+
 
 	if (atEnd()) {
 		SET_CONTENT("");
@@ -108,12 +118,21 @@ token_t _produceNextToken(StrView* content, Location* loc) {
 	}
 
 	//Fixed length
-	RET_IF_MATCH(";",     TK_SEMICOLON);
-	RET_IF_MATCH("var",   TK_VAR);
-	RET_IF_MATCH("if",    TK_IF);
-	RET_IF_MATCH("else",  TK_ELSE);
-	RET_IF_MATCH("print", TK_PRINT);
-	RET_IF_MATCH("while", TK_WHILE);
+	RET_IF_MATCH(";",       TK_SEMICOLON);
+	RET_IF_MATCH("var",     TK_VAR);
+	RET_IF_MATCH("if",      TK_IF);
+	RET_IF_MATCH("else",    TK_ELSE);
+	RET_IF_MATCH("print",   TK_PRINT);
+	RET_IF_MATCH("while",   TK_WHILE);
+	RET_IF_MATCH("func",    TK_DEC_FUNCTION);
+	RET_IF_MATCH(":",       TK_PARAMETER_LIST_SEPARATOR);
+	RET_IF_MATCH("Number",  TK_TYPE_NUMBER);
+	RET_IF_MATCH("Boolean", TK_TYPE_BOOLEAN);
+	RET_IF_MATCH("Bool",    TK_TYPE_BOOLEAN);
+	RET_IF_MATCH("String",  TK_TYPE_STRING);
+	RET_IF_MATCH("type",    TK_TYPE_CUSTOM);
+	RET_IF_MATCH("return",  TK_RETURN);
+
 
 
 	RET_IF_MATCH("+", TK_ADD);
