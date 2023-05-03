@@ -1,5 +1,6 @@
-#ifndef BRASH_LEXER
-#define BRASH_LEXER
+#pragma once
+#include <cstddef>
+
 typedef enum {
 	TK_ERROR,
 	TK_EOF,
@@ -78,4 +79,3 @@ void setLexer(char* filename, char* program);
 Token produceNextToken();
 
 bool isAssignmentStatement();
-#endif
