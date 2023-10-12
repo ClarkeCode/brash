@@ -14,8 +14,9 @@ int main(int argc, char* argv[]) {
 	Lexer lex("test.txt");
 	lex.process();
 
-	for (auto tk : lex.tokenSequence) {
-		cout << tk << endl;
+	{
+		ofstream fs("test.lex");
+		lex.dump(fs);
 	}
 
 	return EXIT_SUCCESS;

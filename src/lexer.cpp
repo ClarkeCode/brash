@@ -34,6 +34,11 @@ void Lexer::process() {
 
 }
 
+void Lexer::dump(std::ostream &os) {
+	for (Token tk : tokenSequence) {
+		os << tk << endl;
+	}
+}
 
 const string WHITESPACE_CHARS = " \t";
 const string VALID_NUMERIC_CHARS = "0123456789.";

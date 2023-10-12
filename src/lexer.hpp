@@ -131,4 +131,5 @@ struct Lexer {
 
 	Lexer(std::string filename);
 	void process();
+	void dump(std::ostream& os);
 };
