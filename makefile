@@ -15,7 +15,7 @@ MAKE = make --no-print-directory
 
 FINAL_TARGET = brash
 
-brash: $(SRCDIR)main.cpp $(SRCDIR)lexer.cpp
+brash: $(SRCDIR)main.cpp $(SRCDIR)lexer.cpp $(SRCDIR)compiler.cpp
 	$(CC) $^ -o $@
 
 clean:

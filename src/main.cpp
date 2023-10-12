@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <fstream>
 #include "lexer.hpp"
+#include "compiler.hpp"
 
 using namespace std;
 
@@ -18,6 +19,11 @@ int main(int argc, char* argv[]) {
 		ofstream fs("test.lex");
 		lex.dump(fs);
 	}
+
+	Compiler comp(lex);
+	comp.process();
+
+	comp.dump(cout);
 
 	return EXIT_SUCCESS;
 }
