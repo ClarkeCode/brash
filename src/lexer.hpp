@@ -127,7 +127,8 @@ struct Lexer {
 
 	public:
 	std::string filename;
-	std::vector<Token> tokenSequence;
+	using TokenSequence = std::vector<Token>;
+	TokenSequence tokenSequence;
 
 	Lexer(std::string filename);
 	void process();
