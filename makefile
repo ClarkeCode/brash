@@ -1,25 +1,29 @@
 #Used https://opensource.com/article/18/8/what-how-makefile as a reference
 
 CC = g++ --std=c++20 -g -Wall -Wextra -Wno-unused-parameter
-COMPILERFLAGS = -c -D BRASH_ALLOW_DEBUG_OUTPUT
+COMPILERFLAGS = -c
 LINKERFLAGS = -lm
 
 TOOLDIR := tools/
 
 SRCDIR := src/
 BUILDDIR := build/
-SRCS := $(wildcard $(SRCDIR)*.c) 
-OBJS := $(SRCS:$(SRCDIR)%.c=$(BUILDDIR)%.o)
+SRCS := $(wildcard $(SRCDIR)*.cpp) 
+HEADERS := $(wildcard $(SRCDIR)*.hpp) 
+OBJS := $(SRCS:$(SRCDIR)%.cpp=$(BUILDDIR)%.o)
 
 MAKE = make --no-print-directory
 
 FINAL_TARGET = brash
 
-brash: $(SRCDIR)main.cpp $(SRCDIR)lexer.cpp $(SRCDIR)compiler.cpp
-	$(CC) $^ -o $@
+$(FINAL_TARGET): $(OBJS) $(HEADERS)
+	$(CC) $(OBJS) -o $@
+
+$(BUILDDIR)%.o: $(SRCDIR)%.cpp
+	$(CC) $(COMPILERFLAGS) $< -o $@
 
 clean:
-	rm -f brash
+	rm -f brash $(BUILDDIR)*.o
 
 #
 ##Rules
