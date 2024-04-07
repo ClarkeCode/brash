@@ -11,6 +11,7 @@ Take a look at the [Brash Reference Manual](docs/brash-manual.pdf)!
 The following were invaluable sources of inspiration and help:
 - The [Porth](https://www.youtube.com/playlist?list=PLpM-Dvs8t0VbMZA7wW9aR3EtBqe2kinu4) development series by Tsoding
 - [_**Crafting Interpreters**_](https://craftinginterpreters.com/) by Robert Nystrom
+- The [Introduction to Writing Modern Parsers](https://www.youtube.com/playlist?list=PL_2VhOvlMk4XDeq2eOOSDQMrbZj9zIU_b) series by Tyler Laceby
 
 ## Adding Some Flair
 

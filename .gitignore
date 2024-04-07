@@ -1,6 +1,4 @@
-*.out
-*.o
-brash
-
-enum_lookups.*
 .vscode
+zig-cache/
+zig-out/
+brash
