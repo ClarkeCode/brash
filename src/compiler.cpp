@@ -81,6 +81,31 @@ void performPairedTokenCheck(Lexer::TokenSequence::const_iterator start, Lexer::
 	}
 }
 
+
+#define PRECEDENCE_TABLE\
+	X(PREC_NONE),\
+	X(PREC_ASSIGNMENT),\
+	X(PREC_OR),\
+	X(PREC_AND),\
+	X(PREC_XOR),\
+	X(PREC_EQUALITY),\
+	X(PREC_COMPARISON),\
+	X(PREC_TERM),\
+	X(PREC_FACTOR),\
+	X(PREC_UNARY),\
+	X(PREC_PRIMARY),\
+
+#define X(text) text
+enum Precedence : byte_t {
+	PRECEDENCE_TABLE
+};
+#undef X
+
+
+
+
+
+
 void Compiler::process() {
 	performPairedTokenCheck(lexStart, lexEnd);
 };

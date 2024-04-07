@@ -1,0 +1,39 @@
+
+1 + 2 + 3 + 4 = sum4
+
+def sum(numArr) {
+	var sum = 0
+	for x in numArr {
+		sum += x
+	}
+	sum | return
+}
+
+def isSmaller(left, right) {
+	left <= right | ret
+}
+
+def isBigger(left, right) {
+	left >= right | ret
+}
+
+def sort(sequence, isSmaller = comparison) {...}
+
+def giveSortMethod(doSmaller: bool) {
+	(doSmaller ? isSmaller : isBigger) | ret: bool
+}
+
+def uniq(sequence) {
+	[] = output
+	for x in sequence {
+		if x !in output {
+			append output x
+		}
+	}
+	output | ret
+}
+
+
+[1, 2, 4, 3, 2] = list
+
+list | uniq | (giveSortMethod true ▷ sort) | stdout
