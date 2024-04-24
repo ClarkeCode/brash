@@ -20,7 +20,7 @@ pub fn main() !void {
 	defer lex.deinit();
 	// try stdout.print("{}\n", .{lex.atEOF()});
 	try stdout.print("LEXER\n", .{});
-	try lexer.Tokenize(&lex);
+	try lex.tokenize();
 	for (lex.tokens.items) |token| {
 		try stdout.print("{s}\n", .{token.toString()});
 	}
