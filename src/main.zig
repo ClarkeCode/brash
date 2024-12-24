@@ -1,5 +1,36 @@
 const std = @import("std");
 const lexer = @import("lexer.zig");
+const parser = @import("parser.zig");
+
+const stdout_file = std.io.getStdOut().writer();
+var bw = std.io.bufferedWriter(stdout_file);
+const stdout = bw.writer();
+
+fn dfsTraversal(node: *const parser.ASTnode, traversed: usize) !usize {
+	const currentIndex = traversed;
+	try stdout.print("n{d} [label=\"<{s}>\\n'{s}'\" shape={s}];\n", .{
+		traversed, node.token.kind.toString(), node.token.text,
+		switch (node.token.kind) {
+			.Add, .Subtract, => "octagon",
+			else => "box"
+		}
+	});
+
+	var moreTravel = traversed;
+	if (node.left) |child| {
+		const childIndex = moreTravel + 1;
+		moreTravel = try dfsTraversal(child, childIndex);
+		try stdout.print("n{d} -> n{d};\n", .{currentIndex, childIndex});
+	}
+
+	if (node.right) |child| {
+		const childIndex = moreTravel + 1;
+		moreTravel = try dfsTraversal(child, childIndex);
+		try stdout.print("n{d} -> n{d};\n", .{currentIndex, childIndex});
+	}
+
+	return moreTravel;
+}
 
 pub fn main() !void {
 	// Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
@@ -8,9 +39,7 @@ pub fn main() !void {
 	// stdout is for the actual output of your application, for example if you
 	// are implementing gzip, then only the compressed bytes should be sent to
 	// stdout, not any debugging messages.
-	const stdout_file = std.io.getStdOut().writer();
-	var bw = std.io.bufferedWriter(stdout_file);
-	const stdout = bw.writer(); 
+
 
 
 	var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -25,6 +54,20 @@ pub fn main() !void {
 		try stdout.print("{s}\n", .{token.toString()});
 	}
 
+
+	try stdout.print("\nPARSER\n", .{});
+	//TODO: may want to consider using an arena allocator for the whole thing, as all allocations should live for the life of the program
+	var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+	defer arena.deinit();
+	const arenAlloc = arena.allocator();
+
+	var prs: parser.Parser = .{.tokens = &lex.tokens.items};
+	var root = try prs.parse(arenAlloc);
+
+	//Graphviz output of the AST
+	try stdout.print("digraph G {c}\n", .{'{'});
+	_ = try dfsTraversal(root, 0);
+	try stdout.print("{c}\n", .{'}'});
 
 	try stdout.print("Run `zig build test` to run the tests.\n", .{});
 

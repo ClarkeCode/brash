@@ -1,85 +1,8 @@
-pub const TokenType = enum {
-	Error,
-	EOF,
-	Newline,
-	Semicolon,
-	Comma,
-
-	//Primitives
-	Number,
-	String,
-	Boolean,
-	Identifier,
-
-	//Scope and Bracketing
-	ParenOpen,
-	ParenClose,
-	SquareBracketOpen,
-	SquareBracketClose,
-	BraceOpen,
-	BraceClose,
-
-	//Arithmetic Operators
-	Add,
-	Subtract,
-	Multiply,
-	Divide,
-	Modulo,
-	Assignment,
-
-	//Logical Operators
-	Not,
-	And,
-	Or,
-	Xor,
-
-	//Comparison Operators
-	Equality,
-	Inequality,
-	Lesser,
-	Greater,
-	LesserEqual,
-	GreaterEqual,
-
-	//Control flow and loops
-	If,
-	Else,
-	For,
-	While,
-
-	Var,
-	Const,
-
-	Function,
-	Return,
-
-	pub fn toString(self: TokenType) []const u8 { return @tagName(self); }
-};
-
+const tokens = @import("tokens.zig");
 const std = @import("std");
 const strutil = @import("stringutils.zig");
 
-pub const Token = struct {
-	kind: TokenType,
-	value: []const u8,
-
-	//TODO: This probably leaks memory, but is good enough for now
-	pub fn toString(self: Token) []const u8 {
-		return std.fmt.allocPrint(std.heap.page_allocator, "Token <{s}> '{s}'", .{self.kind.toString(), self.value}) catch "";
-	}
-
-	pub fn isTypes(self: Token, typeTuple: anytype) bool {
-		inline for (typeTuple) |value| {
-			if (self.kind == value) { return true; }
-		}
-		return false;
-	}
-};
-pub fn makeToken(kind: TokenType, value: []const u8) Token {
-	return Token{.kind = kind, .value = value};
-}
-
-
+const makeToken = tokens.makeToken;
 
 
 
@@ -194,21 +117,18 @@ test "matchString" {
 
 
 
-
-
-const TokenList_t = std.ArrayList(Token);
 pub const Lexer = struct {
-	tokens: TokenList_t,
+	tokens: tokens.TokenList_t,
 	source: []const u8,
 	position: usize = 0,
 
 	fn advanceN(self: *Lexer, advance: usize) void { self.position += advance; }
 	fn getRemainder(self: *Lexer) []const u8 { return self.source[self.position..]; }
 	fn atEOF(self: *Lexer) bool { return self.position >= self.source.len; }
-	fn pushNewToken(self: *Lexer, kind: TokenType, value: []const u8) !void { try self.tokens.append(makeToken(kind, value)); }
+	fn pushNewToken(self: *Lexer, kind: tokens.TokenType, value: []const u8) !void { try self.tokens.append(makeToken(kind, value)); }
 
 	pub fn init(allocator: std.mem.Allocator, source: []const u8) Lexer {
-		return .{.tokens = TokenList_t.init(allocator), .source = source, .position = 0};
+		return .{.tokens = tokens.TokenList_t.init(allocator), .source = source, .position = 0};
 	}
 	pub fn deinit(self: *Lexer) void { self.tokens.deinit(); }
 

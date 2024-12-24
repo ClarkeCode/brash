@@ -10,5 +10,8 @@ $(FINAL_TARGET): $(SRCS)
 	zig build
 	cp zig-out/bin/$(FINAL_TARGET) .
 
+test:
+	zig build test
+
 clean:
 	find zig-cache zig-out brash -delete
