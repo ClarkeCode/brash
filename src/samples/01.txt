@@ -1,0 +1,4 @@
+var a = 34 ;
+var b = 35 ;
+var c = a + b ;
+print c ;

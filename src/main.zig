@@ -1,31 +1,28 @@
 const std = @import("std");
-//const lexer = @import("lexer.zig");
-//const parser = @import("parser.zig");
+const lex = @import("lexer.zig").lex;
 
-const stdout_file = std.io.getStdOut().writer();
-var bw = std.io.bufferedWriter(stdout_file);
-const stdout = bw.writer();
+
+const showLexer = true;
 
 pub fn main() !void {
-	// Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-	std.debug.print("Time to be {s}!\n", .{"brash"});
+	const stdout = std.io.getStdOut().writer();
+	//const stderr = std.io.getStdErr().writer(); //or std.debug.print()
+	try stdout.print("Time to be {s}!\n", .{"brash"});
 
-	// stdout is for the actual output of your application, for example if you
-	// are implementing gzip, then only the compressed bytes should be sent to
-	// stdout, not any debugging messages.
+	var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+	const alloc = gpa.allocator();
 
-	//var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-	//const alloc = gpa.allocator();
+	const fileinput = @embedFile("samples/01.txt");
+	//try stdout.print("{s}", .{fileinput});
 
-	//var lex = lexer.Lexer.init(alloc, "1+2==3");
-	//defer lex.deinit();
-	//try stdout.print("LEXER\n", .{});
-	//try lex.tokenize();
-	//for (lex.tokens.items) |token| {
-	//	try stdout.print("{s}\n", .{token.toString()});
-	//}
+	const toks = try lex(alloc, fileinput);
+	if (showLexer) {
+		try stdout.print("----- {s} -----\n", .{"Start Lexer"});
+		for (toks) |token| {
+			try stdout.print("{s}\n", .{token.toSlice()});
+		}
+		try stdout.print("----- {s} -----\n", .{"End Lexer"});
+	}
 
 	try stdout.print("Run `zig build test` to run the tests.\n", .{});
-
-	try bw.flush(); // don't forget to flush!
 }
